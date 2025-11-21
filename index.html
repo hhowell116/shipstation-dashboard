@@ -279,11 +279,25 @@
         }
         
         function parseLeaderboardData(rows) {
-            if (!rows || rows.length < 6) return null;
+            console.log('Total rows received:', rows ? rows.length : 0);
+            
+            if (!rows || rows.length < 6) {
+                console.error('Not enough rows. Expected at least 6, got:', rows?.length || 0);
+                return null;
+            }
+            
+            // Log first few rows to see structure
+            console.log('Row 0:', rows[0]);
+            console.log('Row 1:', rows[1]);
+            console.log('Row 2:', rows[2]);
+            console.log('Row 5 (first data row):', rows[5]);
             
             // Extract header info
-            const weekRange = rows[1]?.c[0]?.v || 'Week not set';
-            const lastUpdated = rows[2]?.c[0]?.v || 'Never';
+            const weekRange = rows[1]?.c?.[0]?.v || 'Week not set';
+            const lastUpdated = rows[2]?.c?.[0]?.v || 'Never';
+            
+            console.log('Week Range:', weekRange);
+            console.log('Last Updated:', lastUpdated);
             
             // Parse three leaderboards
             const leaderboards = {
@@ -330,6 +344,11 @@
                     });
                 }
             }
+            
+            console.log('Parsed leaderboards:', leaderboards);
+            console.log('Full-time count:', leaderboards.fulltime.length);
+            console.log('Part-time count:', leaderboards.parttime.length);
+            console.log('Wholesale count:', leaderboards.wholesale.length);
             
             return { weekRange, lastUpdated, leaderboards };
         }
