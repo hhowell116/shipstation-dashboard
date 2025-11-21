@@ -16,171 +16,145 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow: hidden;
         }
         
         .container {
-            max-width: 1800px;
+            max-width: 1900px;
             margin: 0 auto;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            margin-bottom: 30px;
+            padding: 25px 30px;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
         
         .header h1 {
             font-size: 2.5em;
             color: #1a1a1a;
-            margin-bottom: 10px;
+            margin: 0 0 10px 0;
+            font-weight: 700;
         }
         
-        .week-range {
-            font-size: 1.2em;
+        .refresh-info {
+            font-size: 0.95em;
             color: #666;
-            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
         
-        .last-updated {
-            font-size: 0.9em;
-            color: #999;
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: white;
-            font-size: 1.5em;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #34a853;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
         }
         
-        .leaderboards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .leaderboard {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            overflow: hidden;
+        .dashboard-frame {
+            flex: 1;
+            background: white;
+            border-radius: 0 0 15px 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
+            overflow: hidden;
+            position: relative;
         }
         
-        .leaderboard:hover {
-            transform: translateY(-5px);
-        }
-        
-        .leaderboard-header {
-            padding: 20px;
-            color: white;
-            font-size: 1.5em;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        .fulltime .leaderboard-header {
-            background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
-        }
-        
-        .parttime .leaderboard-header {
-            background: linear-gradient(135deg, #4285f4 0%, #3367d6 100%);
-        }
-        
-        .wholesale .leaderboard-header {
-            background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
-        }
-        
-        .leaderboard-table {
+        iframe {
             width: 100%;
-            border-collapse: collapse;
+            height: 100%;
+            border: none;
+            display: block;
         }
         
-        .leaderboard-table thead {
-            background: #f5f5f5;
-        }
-        
-        .leaderboard-table th {
-            padding: 15px 10px;
-            text-align: center;
-            font-weight: 600;
-            color: #444;
-            font-size: 0.95em;
-            border-bottom: 2px solid #ddd;
-        }
-        
-        .leaderboard-table td {
-            padding: 15px 10px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            font-size: 0.95em;
-        }
-        
-        .leaderboard-table tbody tr:hover {
-            background: #f9f9f9;
-        }
-        
-        .rank {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-        
-        .employee-name {
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .medal-gold {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            font-weight: bold;
-        }
-        
-        .medal-silver {
-            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-            font-weight: bold;
-        }
-        
-        .medal-bronze {
-            background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 100%);
-            font-weight: bold;
-        }
-        
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-style: italic;
-        }
-        
-        .refresh-indicator {
+        .controls {
             position: fixed;
             bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.95);
             padding: 15px 25px;
             border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
             font-size: 0.9em;
-            color: #666;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px;
-            text-align: center;
+        .control-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
         
-        @media (max-width: 1400px) {
-            .leaderboards {
-                grid-template-columns: 1fr;
-            }
+        .refresh-btn {
+            color: #667eea;
+        }
+        
+        .countdown-display {
+            color: #764ba2;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         @media (max-width: 768px) {
@@ -188,12 +162,22 @@
                 font-size: 1.8em;
             }
             
-            .leaderboard-header {
-                font-size: 1.2em;
+            body {
+                padding: 10px;
             }
             
-            .leaderboards {
-                grid-template-columns: 1fr;
+            .refresh-info {
+                font-size: 0.85em;
+            }
+            
+            .control-btn {
+                font-size: 0.8em;
+                padding: 12px 20px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                bottom: 10px;
             }
         }
     </style>
@@ -202,279 +186,105 @@
     <div class="container">
         <div class="header">
             <h1>📊 WEEKLY SHIPSTATION LEADERBOARD</h1>
-            <div class="week-range" id="weekRange">Loading...</div>
-            <div class="last-updated" id="lastUpdated">Loading data...</div>
+            <div class="refresh-info">
+                <div class="info-item">
+                    <span class="status-dot"></span>
+                    <span>Live Dashboard</span>
+                </div>
+                <div class="info-item">
+                    <span>🕐</span>
+                    <span>Auto-refresh every 5 min</span>
+                </div>
+                <div class="info-item">
+                    <span>📅</span>
+                    <span id="lastRefresh">Just now</span>
+                </div>
+            </div>
         </div>
         
-        <div id="content" class="loading">
-            Loading leaderboards...
+        <div class="dashboard-frame">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+            </div>
+            <iframe id="dashboardIframe" 
+                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg1IcVEFIHayTiwF/pubhtml?gid=1113265790&single=true&widget=true&headers=false&chrome=false"
+                title="Weekly Leaderboard Dashboard">
+            </iframe>
         </div>
     </div>
     
-    <div class="refresh-indicator" id="refreshIndicator">
-        Next refresh in <span id="countdown">5:00</span>
+    <div class="controls">
+        <button class="control-btn refresh-btn" onclick="refreshDashboard()">
+            🔄 Refresh Now
+        </button>
+        <div class="control-btn countdown-display">
+            ⏱️ Next refresh: <span id="countdown">5:00</span>
+        </div>
     </div>
 
     <script>
-        const SHEET_ID = '1HYfTADTvqpOMByLHcNPrgu8ahY58AZmdxaVgKbfQlMQ'; // Original Sheet ID
-        const GID = '1113265790'; // Weekly Dashboard tab GID
-        const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-        
+        let countdownSeconds = 300; // 5 minutes
         let countdownInterval;
         
-        async function fetchSheetData() {
-            try {
-                // Use CSV export - more reliable for published sheets
-                const csvUrl = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${GID}&single=true&output=csv`;
-                
-                console.log('Fetching CSV from:', csvUrl);
-                
-                const response = await fetch(csvUrl);
-                
-                if (!response.ok) {
-                    console.error('Response not OK:', response.status);
-                    return null;
-                }
-                
-                const csvText = await response.text();
-                console.log('CSV loaded, length:', csvText.length);
-                
-                // Parse CSV into rows
-                const rows = parseCSV(csvText);
-                console.log('Parsed rows:', rows.length);
-                
-                return rows;
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                return null;
-            }
+        function updateLastRefreshTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            document.getElementById('lastRefresh').textContent = 'Last: ' + timeString;
         }
         
-        function parseCSV(text) {
-            const rows = [];
-            const lines = text.split('\n');
-            
-            for (let line of lines) {
-                // Simple CSV parser (handles basic cases)
-                const row = [];
-                let current = '';
-                let inQuotes = false;
-                
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        row.push(current.trim());
-                        current = '';
-                    } else {
-                        current += char;
-                    }
-                }
-                row.push(current.trim());
-                rows.push(row);
-            }
-            
-            return rows;
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
         }
         
-        function parseLeaderboardData(rows) {
-            console.log('Total rows received:', rows ? rows.length : 0);
-            
-            if (!rows || rows.length < 6) {
-                console.error('Not enough rows. Expected at least 6, got:', rows?.length || 0);
-                return null;
-            }
-            
-            // Log first few rows to see structure
-            console.log('Row 0:', rows[0]);
-            console.log('Row 1:', rows[1]);
-            console.log('Row 2:', rows[2]);
-            console.log('Row 5 (first data row):', rows[5]);
-            
-            // Extract header info from CSV (row indices match sheet)
-            // Row 1 = Week range (merged cell A2)
-            // Row 2 = Last updated (merged cell A3)
-            const weekRange = rows[1]?.[0] || 'Week not set';
-            const lastUpdated = rows[2]?.[0] || 'Never';
-            
-            console.log('Week Range:', weekRange);
-            console.log('Last Updated:', lastUpdated);
-            
-            // Parse three leaderboards
-            const leaderboards = {
-                fulltime: [],
-                parttime: [],
-                wholesale: []
-            };
-            
-            // Start from row 5 (index 5) - data rows after headers
-            for (let i = 5; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length < 2) continue;
-                
-                // Full-time (columns B-F, indices 1-5)
-                if (row[1] && row[1].trim()) {
-                    leaderboards.fulltime.push({
-                        rank: row[1] || '',
-                        employee: row[2] || '',
-                        products: parseFloat(row[3]) || 0,
-                        orders: parseFloat(row[4]) || 0,
-                        avg: parseFloat(row[5]) || 0
-                    });
-                }
-                
-                // Part-time (columns H-L, indices 7-11)
-                if (row[7] && row[7].trim()) {
-                    leaderboards.parttime.push({
-                        rank: row[7] || '',
-                        employee: row[8] || '',
-                        products: parseFloat(row[9]) || 0,
-                        orders: parseFloat(row[10]) || 0,
-                        avg: parseFloat(row[11]) || 0
-                    });
-                }
-                
-                // Wholesale (columns N-R, indices 13-17)
-                if (row[13] && row[13].trim()) {
-                    leaderboards.wholesale.push({
-                        rank: row[13] || '',
-                        employee: row[14] || '',
-                        products: parseFloat(row[15]) || 0,
-                        orders: parseFloat(row[16]) || 0,
-                        avg: parseFloat(row[17]) || 0
-                    });
-                }
-            }
-            
-            console.log('Parsed leaderboards:', leaderboards);
-            console.log('Full-time count:', leaderboards.fulltime.length);
-            console.log('Part-time count:', leaderboards.parttime.length);
-            console.log('Wholesale count:', leaderboards.wholesale.length);
-            
-            return { weekRange, lastUpdated, leaderboards };
+        function hideLoading() {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.remove('active');
+            }, 500);
         }
         
-        function getMedalClass(index) {
-            if (index === 0) return 'medal-gold';
-            if (index === 1) return 'medal-silver';
-            if (index === 2) return 'medal-bronze';
-            return '';
-        }
-        
-        function createLeaderboardHTML(title, type, data) {
-            if (!data || data.length === 0) {
-                return `
-                    <div class="leaderboard ${type}">
-                        <div class="leaderboard-header">🏆 ${title.toUpperCase()} 🏆</div>
-                        <div class="no-data">No data for this week</div>
-                    </div>
-                `;
-            }
+        function refreshDashboard() {
+            const iframe = document.getElementById('dashboardIframe');
+            showLoading();
             
-            const rows = data.map((item, index) => `
-                <tr class="${getMedalClass(index)}">
-                    <td class="rank">${item.rank}</td>
-                    <td class="employee-name">${item.employee}</td>
-                    <td>${item.products}</td>
-                    <td>${item.orders}</td>
-                    <td>${item.avg}</td>
-                </tr>
-            `).join('');
+            // Add timestamp to force refresh
+            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg1IcVEFIHayTiwF/pubhtml?gid=1113265790&single=true&widget=true&headers=false&chrome=false';
+            iframe.src = baseUrl + '&t=' + new Date().getTime();
             
-            return `
-                <div class="leaderboard ${type}">
-                    <div class="leaderboard-header">🏆 ${title.toUpperCase()} 🏆</div>
-                    <table class="leaderboard-table">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Employee</th>
-                                <th>Products</th>
-                                <th>Orders</th>
-                                <th>Avg/Order</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            updateLastRefreshTime();
+            countdownSeconds = 300; // Reset countdown
+            
+            // Hide loading after iframe loads
+            iframe.onload = hideLoading;
         }
         
         function startCountdown() {
-            let seconds = 300; // 5 minutes
-            
             if (countdownInterval) clearInterval(countdownInterval);
             
             countdownInterval = setInterval(() => {
-                seconds--;
-                if (seconds <= 0) {
-                    seconds = 300;
-                    loadDashboard();
+                countdownSeconds--;
+                
+                if (countdownSeconds <= 0) {
+                    refreshDashboard();
+                    countdownSeconds = 300;
                 }
                 
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
+                const mins = Math.floor(countdownSeconds / 60);
+                const secs = countdownSeconds % 60;
                 document.getElementById('countdown').textContent = 
                     `${mins}:${secs.toString().padStart(2, '0')}`;
             }, 1000);
         }
         
-        async function loadDashboard() {
-            try {
-                const rows = await fetchSheetData();
-                
-                if (!rows) {
-                    document.getElementById('content').innerHTML = `
-                        <div class="error">
-                            ❌ Error loading data. Please check:<br>
-                            1. Sheet is published to web<br>
-                            2. Sheet has "Anyone with link" viewing permissions<br>
-                            3. Your internet connection
-                        </div>
-                    `;
-                    return;
-                }
-                
-                const parsed = parseLeaderboardData(rows);
-                
-                if (!parsed) {
-                    document.getElementById('content').innerHTML = `
-                        <div class="error">
-                            ❌ Could not parse sheet data. Make sure the "Weekly Dashboard" tab is formatted correctly.
-                        </div>
-                    `;
-                    return;
-                }
-                
-                document.getElementById('weekRange').textContent = parsed.weekRange;
-                document.getElementById('lastUpdated').textContent = 'Last Updated: ' + parsed.lastUpdated;
-                
-                document.getElementById('content').innerHTML = `
-                    <div class="leaderboards">
-                        ${createLeaderboardHTML('Full-time', 'fulltime', parsed.leaderboards.fulltime)}
-                        ${createLeaderboardHTML('Part-Time', 'parttime', parsed.leaderboards.parttime)}
-                        ${createLeaderboardHTML('Wholesale', 'wholesale', parsed.leaderboards.wholesale)}
-                    </div>
-                `;
-                
-                startCountdown();
-            } catch (error) {
-                console.error('Load error:', error);
-                document.getElementById('content').innerHTML = `
-                    <div class="error">
-                        ❌ Error: ${error.message}<br><br>
-                        Please ensure your Google Sheet is properly published and accessible.
-                    </div>
-                `;
-            }
-        }
+        // Initialize
+        updateLastRefreshTime();
+        startCountdown();
         
-        // Initial load
-        loadDashboard();
+        // Hide loading on initial load
+        document.getElementById('dashboardIframe').onload = hideLoading;
     </script>
 </body>
 </html>
