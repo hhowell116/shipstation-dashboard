@@ -85,7 +85,7 @@
         
         .leaderboards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 20px;
             height: 100%;
             overflow: hidden;
@@ -94,24 +94,25 @@
         .leaderboard {
             background: #f8f9fa;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             height: 100%;
+            min-height: 0;
         }
         
         .leaderboard-header {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
         }
         
         .leaderboard-header h2 {
-            font-size: 1.4em;
+            font-size: 1.2em;
             margin: 0;
             font-weight: 600;
         }
@@ -119,28 +120,31 @@
         .leaderboard-table {
             flex: 1;
             overflow-y: auto;
+            min-height: 0;
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 1.1em;
+            font-size: 0.95em;
         }
         
         th {
             background: #e9ecef;
-            padding: 12px 8px;
-            text-align: left;
+            padding: 10px 6px;
+            text-align: center;
             font-weight: 600;
             color: #495057;
             border-bottom: 2px solid #dee2e6;
             position: sticky;
             top: 0;
+            font-size: 0.9em;
         }
         
         td {
-            padding: 12px 8px;
+            padding: 10px 6px;
             border-bottom: 1px solid #dee2e6;
+            text-align: center;
         }
         
         tr:hover {
@@ -162,15 +166,15 @@
         
         .rank-badge {
             display: inline-block;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: #667eea;
             color: white;
             text-align: center;
-            line-height: 30px;
+            line-height: 28px;
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 8px;
         }
         
         .rank-1 .rank-badge {
@@ -280,11 +284,38 @@
             margin: 10px 0;
         }
         
-        @media (max-width: 768px) {
+        .week-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .week-info h3 {
+            margin: 0 0 5px 0;
+            color: #1a73e8;
+            font-size: 1.1em;
+        }
+        
+        .last-updated {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0;
+        }
+
+        @media (max-width: 1200px) {
             .leaderboards-container {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
             
+            .leaderboard {
+                min-height: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
             }
@@ -334,6 +365,12 @@
                 <div class="spinner"></div>
                 <div>Loading leaderboard data...</div>
             </div>
+            
+            <div id="weekInfoContainer" class="week-info" style="display: none;">
+                <h3 id="weekRange">Week: Loading...</h3>
+                <p id="lastUpdated" class="last-updated">Last Updated: Loading...</p>
+            </div>
+            
             <div id="leaderboardsContainer" class="leaderboards-container">
                 <!-- Leaderboards will be dynamically inserted here -->
             </div>
@@ -350,134 +387,222 @@
     </div>
 
     <script>
-        // Configuration
-        const SHEET_ID = 'YOUR_SHEET_ID_HERE'; // Replace with your Google Sheet ID
-        const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your Google Sheets API key
+        // Configuration - Using your published Google Sheet
+        const PUBLISHED_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg1IcVEFIHayTiwF/pubhtml';
         
         let countdownSeconds = 300; // 5 minutes
         let countdownInterval;
         
-        // Function to fetch data from Google Sheets
+        // Function to parse HTML table data from published sheet
         async function fetchSheetData() {
             showLoading();
             
             try {
-                // This URL assumes your sheet is published to the web
-                // If not published, you'll need to use the Google Sheets API with proper authentication
-                const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+                const response = await fetch(PUBLISHED_SHEET_URL);
+                const html = await response.text();
                 
-                const response = await fetch(sheetUrl);
-                const text = await response.text();
+                // Parse the HTML to extract table data
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
                 
-                // Remove the prefix that Google Sheets adds
-                const jsonText = text.substring(47, text.length - 2);
-                const data = JSON.parse(jsonText);
+                // Get all tables from the published sheet
+                const tables = doc.querySelectorAll('table');
                 
-                renderLeaderboards(data);
+                if (tables.length === 0) {
+                    throw new Error('No tables found in the published sheet');
+                }
+                
+                // Process the tables and extract leaderboard data
+                processTables(tables);
                 hideLoading();
                 return true;
+                
             } catch (error) {
                 console.error('Error fetching data:', error);
-                showError('Failed to load data. Please check your sheet configuration.');
+                showError('Failed to load data from Google Sheets. Please check if the sheet is published correctly.');
                 hideLoading();
                 return false;
             }
         }
         
-        // Function to render leaderboards
-        function renderLeaderboards(data) {
+        // Function to process tables and extract leaderboard data
+        function processTables(tables) {
             const container = document.getElementById('leaderboardsContainer');
             container.innerHTML = '';
             
-            if (!data || !data.table) {
-                showError('No data found in the sheet.');
-                return;
-            }
+            // Show week info if available
+            const weekInfoContainer = document.getElementById('weekInfoContainer');
+            weekInfoContainer.style.display = 'block';
             
-            const { cols, rows } = data.table;
+            // Try to find the Weekly Dashboard table (usually the first table)
+            const mainTable = tables[0];
+            const rows = mainTable.querySelectorAll('tr');
             
-            // Create tables for different metrics
-            // Assuming your sheet has columns like: Name, Packages Shipped, Accuracy, Speed, etc.
-            const metrics = [
-                { title: '🚀 Packages Shipped', column: 1 },
-                { title: '🎯 Accuracy Rate', column: 2 },
-                { title: '⚡ Speed Score', column: 3 }
+            // Extract week information from the first few rows
+            extractWeekInfo(rows);
+            
+            // The Weekly Dashboard has three leaderboards side by side
+            // Full-time: Columns B-F (1-5)
+            // Part-Time: Columns H-L (7-11)  
+            // Wholesale: Columns N-R (13-17)
+            
+            const leaderboards = [
+                { 
+                    name: 'Full-time', 
+                    startCol: 1, 
+                    endCol: 5,
+                    color: '#34a853'
+                },
+                { 
+                    name: 'Part-Time', 
+                    startCol: 7, 
+                    endCol: 11,
+                    color: '#4285f4'
+                },
+                { 
+                    name: 'Wholesale', 
+                    startCol: 13, 
+                    endCol: 17,
+                    color: '#f57c00'
+                }
             ];
             
-            metrics.forEach(metric => {
-                const leaderboard = createLeaderboard(metric.title, rows, metric.column, cols);
-                container.appendChild(leaderboard);
+            leaderboards.forEach(leaderboard => {
+                const leaderboardData = extractLeaderboardData(rows, leaderboard.startCol, leaderboard.endCol);
+                const leaderboardElement = createLeaderboardElement(leaderboard.name, leaderboardData, leaderboard.color);
+                container.appendChild(leaderboardElement);
             });
         }
         
-        // Function to create a single leaderboard
-        function createLeaderboard(title, rows, valueColumnIndex, columns) {
+        // Function to extract week information
+        function extractWeekInfo(rows) {
+            if (rows.length >= 2) {
+                // Week range is typically in row 1 (0-indexed)
+                const weekRangeCell = rows[1]?.querySelector('td');
+                if (weekRangeCell) {
+                    const weekText = weekRangeCell.textContent.trim();
+                    if (weekText.startsWith('Week:')) {
+                        document.getElementById('weekRange').textContent = weekText;
+                    }
+                }
+                
+                // Last updated is typically in row 2 (0-indexed)
+                const lastUpdatedCell = rows[2]?.querySelector('td');
+                if (lastUpdatedCell) {
+                    const updatedText = lastUpdatedCell.textContent.trim();
+                    if (updatedText.startsWith('Last Updated:')) {
+                        document.getElementById('lastUpdated').textContent = updatedText;
+                    }
+                }
+            }
+        }
+        
+        // Function to extract data for a specific leaderboard
+        function extractLeaderboardData(rows, startCol, endCol) {
+            const data = [];
+            let headerFound = false;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].querySelectorAll('td');
+                if (cells.length < endCol) continue;
+                
+                const rowData = [];
+                for (let j = startCol; j <= endCol; j++) {
+                    if (cells[j]) {
+                        rowData.push(cells[j].textContent.trim());
+                    }
+                }
+                
+                // Skip empty rows and look for header pattern
+                if (rowData.length > 0 && !rowData.every(cell => cell === '')) {
+                    // Check if this is the header row (contains "Rank", "Employee", etc.)
+                    if (rowData.some(cell => 
+                        cell.includes('Rank') || 
+                        cell.includes('Employee') || 
+                        cell.includes('Products') ||
+                        cell.includes('Orders') ||
+                        cell.includes('Avg'))) {
+                        headerFound = true;
+                        data.push(rowData); // Include header
+                    } else if (headerFound) {
+                        // This is a data row (after header)
+                        data.push(rowData);
+                    }
+                }
+            }
+            
+            return data;
+        }
+        
+        // Function to create a leaderboard element
+        function createLeaderboardElement(title, data, color) {
             const leaderboardDiv = document.createElement('div');
             leaderboardDiv.className = 'leaderboard';
             
             // Header
             const header = document.createElement('div');
             header.className = 'leaderboard-header';
-            header.innerHTML = `<h2>${title}</h2>`;
+            header.style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, -20)})`;
+            header.innerHTML = `<h2>🏆 ${title.toUpperCase()} 🏆</h2>`;
             leaderboardDiv.appendChild(header);
             
             // Table container
             const tableContainer = document.createElement('div');
             tableContainer.className = 'leaderboard-table';
             
+            if (data.length === 0) {
+                tableContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No data available</p>';
+                leaderboardDiv.appendChild(tableContainer);
+                return leaderboardDiv;
+            }
+            
             // Create table
             const table = document.createElement('table');
             
-            // Create header row
+            // Create header row from first data row
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            
-            ['Rank', 'Name', 'Score'].forEach(text => {
+            data[0].forEach(cell => {
                 const th = document.createElement('th');
-                th.textContent = text;
+                th.textContent = cell;
                 headerRow.appendChild(th);
             });
-            
             thead.appendChild(headerRow);
             table.appendChild(thead);
             
-            // Create table body
+            // Create table body from remaining rows
             const tbody = document.createElement('tbody');
-            
-            // Sort rows by the metric value (descending)
-            const sortedRows = [...rows].sort((a, b) => {
-                const valA = parseFloat(a.c[valueColumnIndex]?.v || 0);
-                const valB = parseFloat(b.c[valueColumnIndex]?.v || 0);
-                return valB - valA;
-            });
-            
-            // Create rows for top performers
-            sortedRows.slice(0, 10).forEach((row, index) => {
+            for (let i = 1; i < data.length; i++) {
+                const rowData = data[i];
                 const tr = document.createElement('tr');
                 
                 // Add rank class for styling
-                if (index === 0) tr.className = 'rank-1';
-                else if (index === 1) tr.className = 'rank-2';
-                else if (index === 2) tr.className = 'rank-3';
+                if (i === 1) tr.className = 'rank-1';
+                else if (i === 2) tr.className = 'rank-2';
+                else if (i === 3) tr.className = 'rank-3';
                 
-                // Rank cell
-                const rankCell = document.createElement('td');
-                rankCell.innerHTML = `<span class="rank-badge">${index + 1}</span>`;
-                tr.appendChild(rankCell);
-                
-                // Name cell (assuming first column is name)
-                const nameCell = document.createElement('td');
-                nameCell.textContent = row.c[0]?.v || 'Unknown';
-                tr.appendChild(nameCell);
-                
-                // Value cell
-                const valueCell = document.createElement('td');
-                const value = row.c[valueColumnIndex]?.v;
-                valueCell.innerHTML = `<span class="metric-value">${formatValue(value, title)}</span>`;
-                tr.appendChild(valueCell);
+                rowData.forEach((cell, index) => {
+                    const td = document.createElement('td');
+                    
+                    if (index === 0) {
+                        // Rank column - add badge styling
+                        if (cell === '🥇' || cell === '🥈' || cell === '🥉') {
+                            td.innerHTML = `<span class="rank-badge">${cell}</span>`;
+                        } else {
+                            td.innerHTML = `<span class="rank-badge">${cell}</span>`;
+                        }
+                    } else if (index === 2 || index === 3) {
+                        // Numbers columns
+                        td.innerHTML = `<span class="metric-value">${cell}</span>`;
+                    } else {
+                        td.textContent = cell;
+                    }
+                    
+                    tr.appendChild(td);
+                });
                 
                 tbody.appendChild(tr);
-            });
+            }
             
             table.appendChild(tbody);
             tableContainer.appendChild(table);
@@ -486,19 +611,10 @@
             return leaderboardDiv;
         }
         
-        // Helper function to format values based on metric type
-        function formatValue(value, title) {
-            if (value === null || value === undefined) return '0';
-            
-            const numValue = parseFloat(value);
-            
-            if (title.includes('Rate') || title.includes('Accuracy')) {
-                return `${(numValue * 100).toFixed(1)}%`;
-            } else if (title.includes('Speed')) {
-                return `${numValue.toFixed(1)}`;
-            } else {
-                return Math.round(numValue).toLocaleString();
-            }
+        // Helper function to adjust color brightness
+        function adjustColor(hex, percent) {
+            // Simple color adjustment for gradients
+            return hex; // For now, return same color
         }
         
         function showError(message) {
