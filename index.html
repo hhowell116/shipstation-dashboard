@@ -6,7 +6,7 @@
   <title>WEEKLY SHIPSTATION LEADERBOARD</title>
   <style>
     :root{
-      --header-grad: linear-gradient(90deg,#0B6E4F,#34a853);
+      --header-grad: linear-gradient(90deg,#0a5d42,#2d9c6f);
       --bg-start:#0f1720;
       --bg-end:#1b2730;
       --ft:#34a853;
@@ -27,9 +27,9 @@
       display:flex;align-items:center;gap:16px;padding:16px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;
     }
     .header-center{flex:1;text-align:center}
-    .title{font-weight:800;letter-spacing:1px;font-size:32px;margin:0;padding:0}
-    .meta{font-size:18px;color:rgba(255,255,255,0.95);margin-top:8px;font-weight:600}
-    .submeta{font-size:15px;color:rgba(255,255,255,0.8);margin-top:6px}
+    .title{font-weight:800;letter-spacing:1.5px;font-size:42px;margin:0;padding:0;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
+    .meta{font-size:24px;color:rgba(255,255,255,0.95);margin-top:10px;font-weight:600}
+    .submeta{display:none}
 
     /* Boards */
     .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
@@ -78,10 +78,9 @@
       body{padding:10px;}
       .wrap{padding:10px;margin:10px auto;}
       
-      .header{padding:12px;gap:10px;}
-      .title{font-size:16px;letter-spacing:0.5px}
-      .meta{font-size:11px;}
-      .submeta{font-size:10px;}
+      .header{padding:20px;gap:10px;}
+      .title{font-size:24px;letter-spacing:0.5px}
+      .meta{font-size:16px;}
       
       .boards{gap:12px;margin-top:12px}
       .card{height:500px;}
@@ -99,8 +98,8 @@
     }
     
     @media (max-width:480px){
-      .title{font-size:14px;}
-      .meta, .submeta{font-size:10px;}
+      .title{font-size:20px;}
+      .meta{font-size:14px;}
       
       .card{height:450px;}
       .card-head{font-size:12px;padding:8px;}
