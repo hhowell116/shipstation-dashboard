@@ -33,23 +33,31 @@
 
     /* Boards */
     .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
-    .card{background:var(--card-bg);border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,10,0.35);display:flex;flex-direction:column;height:650px}
+    .card{
+      background:var(--card-bg);
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(2,6,10,0.35), 0 20px 60px rgba(0,0,0,0.6);
+      display:flex;
+      flex-direction:column;
+      height:650px
+    }
     .card-head{padding:12px 14px;color:#fff;font-weight:700;text-align:center}
-    .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:8px}
-    table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
-    thead th{padding:10px 8px;text-align:center;font-weight:700;color:white;position:sticky;top:0;z-index:2}
+    .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;background:#2a2f3a}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead th{padding:12px 8px;text-align:center;font-weight:700;color:white;position:sticky;top:0;z-index:2;background:#1a1f28}
     tbody{display:block;width:100%;overflow:hidden}
-    tbody tr{display:table;width:100%;table-layout:fixed}
-    td{padding:10px 8px;text-align:center;border-bottom:1px solid rgba(16,22,26,0.05);vertical-align:middle;word-break:break-word}
-    .col-rank{width:68px}
-    .col-employee{width:320px;text-align:left;padding-left:12px}
-    .col-prod{width:120px}
-    .col-orders{width:100px}
+    tbody tr{display:table;width:100%;table-layout:fixed;color:#fff}
+    td{padding:12px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;word-break:break-word}
+    .col-rank{width:60px}
+    .col-employee{width:auto;text-align:left;padding-left:12px}
+    .col-prod{width:90px}
+    .col-orders{width:80px}
     .col-avg{width:110px}
 
     /* row shading */
-    tbody tr:nth-child(odd) td{background:var(--row-light)}
-    tbody tr:nth-child(even) td{background:var(--row-dark)}
+    tbody tr:nth-child(odd) td{background:#353b47}
+    tbody tr:nth-child(even) td{background:#2e343f}
 
     /* medals - highlight entire row */
     .medal-gold td{background:var(--gold) !important;color:#000;font-weight:700}
@@ -57,7 +65,7 @@
     .medal-bronze td{background:var(--bronze) !important;color:#000;font-weight:700}
 
     /* empty state */
-    .empty{color:#8a8f98;padding:20px;text-align:center;font-style:italic}
+    .empty{color:#b0b5bd;padding:20px;text-align:center;font-style:italic}
 
     /* responsive */
     @media (max-width:1100px){.boards{grid-template-columns:1fr;}.col-employee{width:45vw} .card{height:600px}}
@@ -219,14 +227,20 @@
       <div class="card">
         ${head}
         <div class="card-body">
-          <div style="overflow:hidden;flex:1;display:flex;flex-direction:column">
-            <table aria-label="${title} leaderboard">
-              <thead><tr><th class="col-rank">Rank</th><th class="col-employee">Employee</th><th class="col-prod">Products</th><th class="col-orders">Orders</th><th class="col-avg">Avg/Order</th></tr></thead>
-            </table>
-            <div class="scroll-wrapper" data-rows="${rows.length}" style="flex:1;position:relative">
-              <div class="scroll-content" role="list" aria-label="${title} entries">
-                <table><tbody>${rowsHtml}</tbody></table>
-              </div>
+          <table aria-label="${title} leaderboard">
+            <thead>
+              <tr>
+                <th class="col-rank">Rank</th>
+                <th class="col-employee">Employee</th>
+                <th class="col-prod">Products</th>
+                <th class="col-orders">Orders</th>
+                <th class="col-avg">Avg/Order</th>
+              </tr>
+            </thead>
+          </table>
+          <div class="scroll-wrapper" data-rows="${rows.length}" style="flex:1;position:relative">
+            <div class="scroll-content" role="list" aria-label="${title} entries">
+              <table><tbody>${rowsHtml}</tbody></table>
             </div>
           </div>
         </div>
@@ -317,8 +331,6 @@
             raf = requestAnimationFrame(step);
           }
           raf = requestAnimationFrame(step);
-          wrapper.addEventListener('mouseenter', ()=>{ if(raf) cancelAnimationFrame(raf); raf = null; });
-          wrapper.addEventListener('mouseleave', ()=>{ if(!raf){ last = performance.now(); raf = requestAnimationFrame(step); } });
         } else {
           inner.style.marginTop = Math.max(0, (wrapH - contentH)/2) + 'px';
         }
