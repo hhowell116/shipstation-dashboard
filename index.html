@@ -20,18 +20,18 @@
       --card-bg: rgba(255,255,255,0.98);
     }
     html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:linear-gradient(180deg,var(--bg-start),var(--bg-end));color:#111;}
-    .wrap{max-width:1600px;margin:18px auto;padding:18px;}
+    .wrap{max-width:95%;margin:18px auto;padding:18px;}
     
     /* Header */
     .header{
       display:flex;align-items:center;gap:16px;padding:16px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;
     }
     .header-center{flex:1;text-align:center}
-    .title{font-weight:800;letter-spacing:1.5px;font-size:36px;margin:0;padding:0;text-transform:capitalize}
-    .meta{font-size:22px;color:rgba(255,255,255,0.95);margin-top:10px;font-weight:600}
+    .title{font-weight:800;letter-spacing:1.5px;font-size:44px;margin:0;padding:0;text-transform:capitalize}
+    .meta{font-size:26px;color:rgba(255,255,255,0.95);margin-top:10px;font-weight:600}
 
     /* Boards */
-    .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+    .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:22px}
     .card{
       background:var(--card-bg);
       border-radius:10px;
@@ -39,20 +39,21 @@
       box-shadow:0 10px 30px rgba(2,6,10,0.35), 0 20px 60px rgba(0,0,0,0.6);
       display:flex;
       flex-direction:column;
-      height:650px
+      height:calc(100vh - 220px);
+      min-height:700px;
     }
-    .card-head{padding:12px 14px;color:#fff;font-weight:700;text-align:center}
+    .card-head{padding:18px 14px;color:#fff;font-weight:700;text-align:center;font-size:22px}
     .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;background:#2a2f3a}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    thead th{padding:12px 8px;text-align:center;font-weight:700;color:white;position:sticky;top:0;z-index:2;background:#1a1f28}
+    table{width:100%;border-collapse:collapse;font-size:17px}
+    thead th{padding:16px 10px;text-align:center;font-weight:700;color:white;position:sticky;top:0;z-index:2;background:#1a1f28;font-size:18px}
     tbody{display:block;width:100%;overflow:hidden}
     tbody tr{display:table;width:100%;table-layout:fixed;color:#fff}
-    td{padding:12px 8px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;word-break:break-word}
-    .col-rank{width:60px}
-    .col-employee{width:auto;text-align:left;padding-left:12px}
-    .col-prod{width:90px}
-    .col-orders{width:80px}
-    .col-avg{width:110px}
+    td{padding:16px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;word-break:break-word;font-size:17px}
+    .col-rank{width:80px;font-size:20px;font-weight:700}
+    .col-employee{width:auto;text-align:left;padding-left:16px;font-size:18px;font-weight:600}
+    .col-prod{width:110px;font-size:18px;font-weight:600}
+    .col-orders{width:100px;font-size:18px;font-weight:600}
+    .col-avg{width:130px;font-size:18px;font-weight:600}
 
     /* row shading */
     tbody tr:nth-child(odd) td{background:#353b47}
@@ -125,10 +126,53 @@
 
     .notice{grid-column:1/-1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.04);color:#fff;text-align:center}
     
+    /* Fullscreen button */
+    .fullscreen-btn{
+      position:fixed;
+      top:20px;
+      right:20px;
+      background:rgba(255,255,255,0.9);
+      color:#0a5d42;
+      border:2px solid #0a5d42;
+      padding:12px 20px;
+      border-radius:8px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      z-index:10000;
+      transition:all 0.3s ease;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    }
+    .fullscreen-btn:hover{
+      background:white;
+      transform:scale(1.05);
+      box-shadow:0 6px 16px rgba(0,0,0,0.4);
+    }
+    .fullscreen-btn.hidden{
+      opacity:0;
+      pointer-events:none;
+    }
+    
+    /* Hide fullscreen button when in fullscreen */
+    :fullscreen .fullscreen-btn,
+    :-webkit-full-screen .fullscreen-btn,
+    :-moz-full-screen .fullscreen-btn,
+    :-ms-fullscreen .fullscreen-btn{
+      display:none;
+    }
+    
 
   </style>
 </head>
 <body>
+  <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()">
+    <span style="font-size:18px">⛶</span>
+    <span>Enter Fullscreen</span>
+  </button>
+  
   <div class="wrap">
     <div class="header" role="banner">
       <div style="width:56px"></div>
@@ -147,6 +191,49 @@
   <div id="debug" style="display:none"></div>
 
 <script>
+  // Fullscreen functionality
+  function toggleFullscreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+      // Enter fullscreen
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }
+  
+  // Update button text when fullscreen changes
+  document.addEventListener('fullscreenchange', updateFullscreenButton);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+  document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+  document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+  
+  function updateFullscreenButton() {
+    const btn = document.getElementById('fullscreenBtn');
+    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+      btn.innerHTML = '<span style="font-size:18px">⛶</span><span>Exit Fullscreen (ESC)</span>';
+    } else {
+      btn.innerHTML = '<span style="font-size:18px">⛶</span><span>Enter Fullscreen</span>';
+    }
+  }
+
 (async function(){
   const SHEET_ID = '1HYfTADTvqpOMByLHcNPrgu8ahY58AZmdxaVgKbfQlMQ';
   const GID = '1113265790';
