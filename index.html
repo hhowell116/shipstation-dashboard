@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Weekly Leaderboard Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,37 +16,39 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow: hidden;
         }
         
         .container {
             max-width: 1900px;
             margin: 0 auto;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
             background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 25px 30px;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
-            margin-bottom: 30px;
         }
         
         .header h1 {
-            font-size: 3em;
+            font-size: 2.5em;
             color: #1a1a1a;
-            margin-bottom: 15px;
+            margin: 0 0 10px 0;
             font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         
         .refresh-info {
-            font-size: 1em;
+            font-size: 0.95em;
             color: #666;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
             flex-wrap: wrap;
         }
         
@@ -58,8 +59,8 @@
         }
         
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #34a853;
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -70,141 +71,235 @@
             50% { opacity: 0.5; }
         }
         
-        .leaderboards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        
-        .leaderboard-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+        .dashboard-content {
+            flex: 1;
+            background: white;
+            border-radius: 0 0 15px 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
-            animation: fadeIn 0.5s ease;
+            position: relative;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .leaderboards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .leaderboard {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         
         .leaderboard-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            padding: 20px 25px;
-            font-size: 1.5em;
-            font-weight: 700;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
             text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .leaderboard-header h2 {
+            font-size: 1.4em;
+            margin: 0;
+            font-weight: 600;
         }
         
         .leaderboard-table {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 1.1em;
         }
         
-        .leaderboard-table thead {
-            background: #f8f9fa;
-            border-bottom: 3px solid #667eea;
-        }
-        
-        .leaderboard-table th {
-            padding: 15px;
+        th {
+            background: #e9ecef;
+            padding: 12px 8px;
             text-align: left;
             font-weight: 600;
-            color: #333;
-            font-size: 0.95em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
         }
         
-        .leaderboard-table td {
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-            font-size: 1em;
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #dee2e6;
         }
         
-        .leaderboard-table tbody tr {
-            transition: all 0.2s ease;
+        tr:hover {
+            background: #f1f3f5;
         }
         
-        .leaderboard-table tbody tr:hover {
-            background: #f8f9fa;
-            transform: scale(1.01);
+        .rank-1 {
+            background: linear-gradient(135deg, #fff3cd, #ffecb5);
+            font-weight: bold;
         }
         
-        .rank-cell {
-            font-weight: 700;
-            font-size: 1.2em;
-            width: 60px;
-            text-align: center;
+        .rank-2 {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
         }
         
-        .rank-1 { color: #FFD700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
-        .rank-2 { color: #C0C0C0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
-        .rank-3 { color: #CD7F32; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .rank-3 {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        }
         
         .rank-badge {
             display: inline-block;
-            width: 35px;
-            height: 35px;
-            line-height: 35px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
+            background: #667eea;
+            color: white;
             text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
         }
         
-        .rank-1-badge { background: linear-gradient(135deg, #FFD700, #FFA500); }
-        .rank-2-badge { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); }
-        .rank-3-badge { background: linear-gradient(135deg, #CD7F32, #B8702F); }
-        
-        .name-cell {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 1.05em;
+        .rank-1 .rank-badge {
+            background: #ffc107;
+            color: #000;
         }
         
-        .metric-cell {
+        .rank-2 .rank-badge {
+            background: #6c757d;
+        }
+        
+        .rank-3 .rank-badge {
+            background: #dc3545;
+        }
+        
+        .metric-value {
             font-weight: 600;
+            color: #495057;
+        }
+        
+        .positive {
+            color: #28a745;
+        }
+        
+        .negative {
+            color: #dc3545;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .refresh-btn {
             color: #667eea;
-            font-size: 1.1em;
         }
         
-        .loading-message {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2em;
-            color: #666;
+        .countdown-display {
+            color: #764ba2;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .error-message {
+            color: #dc3545;
             text-align: center;
-            padding: 40px;
-            font-size: 1.1em;
-            color: #e74c3c;
-            background: #fee;
-            border-radius: 10px;
-            margin: 20px;
-        }
-        
-
-        
-        @media (max-width: 1200px) {
-            .leaderboards-grid {
-                grid-template-columns: 1fr;
-            }
+            padding: 20px;
+            background: #f8d7da;
+            border-radius: 8px;
+            margin: 10px 0;
         }
         
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2em;
+            .leaderboards-container {
+                grid-template-columns: 1fr;
             }
             
-            .leaderboard-table th,
-            .leaderboard-table td {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            body {
                 padding: 10px;
-                font-size: 0.9em;
+            }
+            
+            .refresh-info {
+                font-size: 0.85em;
+            }
+            
+            .control-btn {
+                font-size: 0.8em;
+                padding: 12px 20px;
             }
             
             .controls {
@@ -220,28 +315,196 @@
             <h1>📊 WEEKLY SHIPSTATION LEADERBOARD</h1>
             <div class="refresh-info">
                 <div class="info-item">
+                    <span class="status-dot"></span>
+                    <span>Live Dashboard</span>
+                </div>
+                <div class="info-item">
+                    <span>🕐</span>
+                    <span>Auto-refresh every 5 min</span>
+                </div>
+                <div class="info-item">
                     <span>📅</span>
-                    <span id="lastRefresh">Loading...</span>
+                    <span id="lastRefresh">Just now</span>
                 </div>
             </div>
         </div>
         
-        <div class="leaderboards-grid" id="leaderboardsContainer">
-            <div class="loading-message">
-                <div style="font-size: 3em; margin-bottom: 20px;">⏳</div>
-                Loading leaderboard data...
+        <div class="dashboard-content">
+            <div class="loading-overlay active" id="loadingOverlay">
+                <div class="spinner"></div>
+                <div>Loading leaderboard data...</div>
             </div>
+            <div id="leaderboardsContainer" class="leaderboards-container">
+                <!-- Leaderboards will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="control-btn refresh-btn" onclick="refreshDashboard()">
+            🔄 Refresh Now
+        </button>
+        <div class="control-btn countdown-display">
+            ⏱️ Next refresh: <span id="countdown">5:00</span>
         </div>
     </div>
 
     <script>
-        // CONFIGURATION - UPDATE THESE WITH YOUR GOOGLE SHEETS INFO
-        const SPREADSHEET_ID = '1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg';
+        // Configuration
+        const SHEET_ID = 'YOUR_SHEET_ID_HERE'; // Replace with your Google Sheet ID
+        const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your Google Sheets API key
         
-        // Define your leaderboards with their sheet GIDs and titles
-        const LEADERBOARDS = [
-            { gid: '1113265790', title: '🏆 Top Performers' }
-        ];
+        let countdownSeconds = 300; // 5 minutes
+        let countdownInterval;
+        
+        // Function to fetch data from Google Sheets
+        async function fetchSheetData() {
+            showLoading();
+            
+            try {
+                // This URL assumes your sheet is published to the web
+                // If not published, you'll need to use the Google Sheets API with proper authentication
+                const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+                
+                const response = await fetch(sheetUrl);
+                const text = await response.text();
+                
+                // Remove the prefix that Google Sheets adds
+                const jsonText = text.substring(47, text.length - 2);
+                const data = JSON.parse(jsonText);
+                
+                renderLeaderboards(data);
+                hideLoading();
+                return true;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showError('Failed to load data. Please check your sheet configuration.');
+                hideLoading();
+                return false;
+            }
+        }
+        
+        // Function to render leaderboards
+        function renderLeaderboards(data) {
+            const container = document.getElementById('leaderboardsContainer');
+            container.innerHTML = '';
+            
+            if (!data || !data.table) {
+                showError('No data found in the sheet.');
+                return;
+            }
+            
+            const { cols, rows } = data.table;
+            
+            // Create tables for different metrics
+            // Assuming your sheet has columns like: Name, Packages Shipped, Accuracy, Speed, etc.
+            const metrics = [
+                { title: '🚀 Packages Shipped', column: 1 },
+                { title: '🎯 Accuracy Rate', column: 2 },
+                { title: '⚡ Speed Score', column: 3 }
+            ];
+            
+            metrics.forEach(metric => {
+                const leaderboard = createLeaderboard(metric.title, rows, metric.column, cols);
+                container.appendChild(leaderboard);
+            });
+        }
+        
+        // Function to create a single leaderboard
+        function createLeaderboard(title, rows, valueColumnIndex, columns) {
+            const leaderboardDiv = document.createElement('div');
+            leaderboardDiv.className = 'leaderboard';
+            
+            // Header
+            const header = document.createElement('div');
+            header.className = 'leaderboard-header';
+            header.innerHTML = `<h2>${title}</h2>`;
+            leaderboardDiv.appendChild(header);
+            
+            // Table container
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'leaderboard-table';
+            
+            // Create table
+            const table = document.createElement('table');
+            
+            // Create header row
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            
+            ['Rank', 'Name', 'Score'].forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
+            
+            // Sort rows by the metric value (descending)
+            const sortedRows = [...rows].sort((a, b) => {
+                const valA = parseFloat(a.c[valueColumnIndex]?.v || 0);
+                const valB = parseFloat(b.c[valueColumnIndex]?.v || 0);
+                return valB - valA;
+            });
+            
+            // Create rows for top performers
+            sortedRows.slice(0, 10).forEach((row, index) => {
+                const tr = document.createElement('tr');
+                
+                // Add rank class for styling
+                if (index === 0) tr.className = 'rank-1';
+                else if (index === 1) tr.className = 'rank-2';
+                else if (index === 2) tr.className = 'rank-3';
+                
+                // Rank cell
+                const rankCell = document.createElement('td');
+                rankCell.innerHTML = `<span class="rank-badge">${index + 1}</span>`;
+                tr.appendChild(rankCell);
+                
+                // Name cell (assuming first column is name)
+                const nameCell = document.createElement('td');
+                nameCell.textContent = row.c[0]?.v || 'Unknown';
+                tr.appendChild(nameCell);
+                
+                // Value cell
+                const valueCell = document.createElement('td');
+                const value = row.c[valueColumnIndex]?.v;
+                valueCell.innerHTML = `<span class="metric-value">${formatValue(value, title)}</span>`;
+                tr.appendChild(valueCell);
+                
+                tbody.appendChild(tr);
+            });
+            
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+            leaderboardDiv.appendChild(tableContainer);
+            
+            return leaderboardDiv;
+        }
+        
+        // Helper function to format values based on metric type
+        function formatValue(value, title) {
+            if (value === null || value === undefined) return '0';
+            
+            const numValue = parseFloat(value);
+            
+            if (title.includes('Rate') || title.includes('Accuracy')) {
+                return `${(numValue * 100).toFixed(1)}%`;
+            } else if (title.includes('Speed')) {
+                return `${numValue.toFixed(1)}`;
+            } else {
+                return Math.round(numValue).toLocaleString();
+            }
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('leaderboardsContainer');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
         
         function updateLastRefreshTime() {
             const now = new Date();
@@ -250,122 +513,50 @@
                 minute: '2-digit',
                 hour12: true 
             });
-            document.getElementById('lastRefresh').textContent = 'Last updated: ' + timeString;
+            document.getElementById('lastRefresh').textContent = 'Last: ' + timeString;
         }
         
-        async function fetchSheetData(gid) {
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
-            
-            return new Promise((resolve, reject) => {
-                Papa.parse(csvUrl, {
-                    download: true,
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (results) => resolve(results.data),
-                    error: (error) => reject(error)
-                });
-            });
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
         }
         
-        function createLeaderboardHTML(data, config) {
-            if (!data || data.length === 0) {
-                return `
-                    <div class="leaderboard-card">
-                        <div class="leaderboard-header">${config.title}</div>
-                        <div class="loading-message">No data available</div>
-                    </div>
-                `;
+        function hideLoading() {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.remove('active');
+            }, 500);
+        }
+        
+        async function refreshDashboard() {
+            const success = await fetchSheetData();
+            if (success) {
+                updateLastRefreshTime();
+                countdownSeconds = 300; // Reset countdown
             }
-            
-            // Get actual column names from data
-            const columns = Object.keys(data[0]);
-            
-            let tableHTML = `
-                <div class="leaderboard-card">
-                    <div class="leaderboard-header">${config.title}</div>
-                    <table class="leaderboard-table">
-                        <thead>
-                            <tr>
-                                ${columns.map(col => `<th>${col}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            data.forEach((row, index) => {
-                const rank = index + 1;
-                const rankClass = rank <= 3 ? `rank-${rank}` : '';
-                
-                tableHTML += '<tr>';
-                
-                columns.forEach((col, colIndex) => {
-                    let cellClass = '';
-                    let cellContent = row[col] || '';
-                    
-                    // First column is typically rank
-                    if (colIndex === 0) {
-                        cellClass = `rank-cell ${rankClass}`;
-                        if (rank <= 3) {
-                            cellContent = `<span class="rank-badge rank-${rank}-badge">${cellContent}</span>`;
-                        }
-                    }
-                    // Second column is typically name
-                    else if (colIndex === 1) {
-                        cellClass = 'name-cell';
-                    }
-                    // Other columns are metrics
-                    else {
-                        cellClass = 'metric-cell';
-                    }
-                    
-                    tableHTML += `<td class="${cellClass}">${cellContent}</td>`;
-                });
-                
-                tableHTML += '</tr>';
-            });
-            
-            tableHTML += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            return tableHTML;
         }
         
-        async function loadAllLeaderboards() {
-            const container = document.getElementById('leaderboardsContainer');
-            container.innerHTML = '<div class="loading-message"><div style="font-size: 3em; margin-bottom: 20px;">⏳</div>Loading leaderboard data...</div>';
+        function startCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
             
-            try {
-                const leaderboardsHTML = [];
+            countdownInterval = setInterval(() => {
+                countdownSeconds--;
                 
-                for (const config of LEADERBOARDS) {
-                    try {
-                        const data = await fetchSheetData(config.gid);
-                        leaderboardsHTML.push(createLeaderboardHTML(data, config));
-                    } catch (error) {
-                        console.error(`Error loading leaderboard ${config.title}:`, error);
-                        leaderboardsHTML.push(`
-                            <div class="leaderboard-card">
-                                <div class="leaderboard-header">${config.title}</div>
-                                <div class="error-message">Error loading data</div>
-                            </div>
-                        `);
-                    }
+                if (countdownSeconds <= 0) {
+                    refreshDashboard();
+                    countdownSeconds = 300;
                 }
                 
-                container.innerHTML = leaderboardsHTML.join('');
-                updateLastRefreshTime();
-                
-            } catch (error) {
-                console.error('Error loading leaderboards:', error);
-                container.innerHTML = '<div class="error-message">Failed to load leaderboards. Please check your configuration.</div>';
-            }
+                const mins = Math.floor(countdownSeconds / 60);
+                const secs = countdownSeconds % 60;
+                document.getElementById('countdown').textContent = 
+                    `${mins}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
         }
         
-        // Load leaderboards on page load
-        loadAllLeaderboards();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshDashboard();
+            startCountdown();
+        });
     </script>
 </body>
 </html>
