@@ -23,22 +23,20 @@
     .wrap{max-width:1400px;margin:18px auto;padding:18px;}
     /* Header */
     .header{
-      display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;
+      display:flex;align-items:center;gap:16px;padding:16px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;
     }
-    .logo{height:56px;width:56px;flex:0 0 56px;border-radius:6px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .logo img{height:48px; width:auto; opacity:0.95; filter: saturate(1.1);}
     .header-center{flex:1;text-align:center}
     .title{font-weight:800;letter-spacing:1px;font-size:20px;margin:0;padding:0}
-    .meta{font-size:13px;color:rgba(255,255,255,0.85);margin-top:6px}
-    .submeta{font-size:12px;color:rgba(255,255,255,0.75);margin-top:4px}
+    .meta{font-size:13px;color:rgba(255,255,255,0.95);margin-top:6px}
+    .submeta{font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px}
 
     /* Boards */
     .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
     .card{background:var(--card-bg);border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,10,0.35);display:flex;flex-direction:column;height:560px}
-    .card-head{padding:10px 12px;color:#fff;font-weight:700;text-align:center}
-    .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:6px 8px}
+    .card-head{padding:12px 14px;color:#fff;font-weight:700;text-align:center}
+    .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:8px}
     table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
-    thead th{padding:10px 8px;text-align:center;font-weight:700;color:white}
+    thead th{padding:10px 8px;text-align:center;font-weight:700;color:white;position:sticky;top:0;z-index:2}
     tbody{display:block;width:100%;overflow:hidden}
     tbody tr{display:table;width:100%;table-layout:fixed}
     td{padding:10px 8px;text-align:center;border-bottom:1px solid rgba(16,22,26,0.05);vertical-align:middle;word-break:break-word}
@@ -63,24 +61,22 @@
     /* responsive */
     @media (max-width:1100px){.boards{grid-template-columns:1fr;}.col-employee{width:45vw} .card{height:520px}}
 
-    /* subtle header badges */
-    .badge{display:inline-block;padding:6px 12px;border-radius:6px;color:rgba(255,255,255,0.98);font-weight:700}
-
-    /* scrolling controls */
+    /* scrolling wrapper */
     .scroll-wrapper{position:relative;flex:1;overflow:hidden}
     .scroll-content{position:absolute;left:0;right:0;top:0}
+    .scroll-content table{margin:0}
+    .scroll-content tbody{display:block}
     .fade-top,.fade-bottom{position:absolute;left:0;right:0;height:36px;pointer-events:none}
     .fade-top{top:0;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0));}
     .fade-bottom{bottom:0;background:linear-gradient(0deg,rgba(255,255,255,0.98),rgba(255,255,255,0));}
 
-    /* small helpers */
-    .small{font-size:12px;color:#666}
+    .notice{grid-column:1/-1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.04);color:#fff;text-align:center}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header" role="banner">
-      <div class="logo"><img src="rowecasa-logo.png" alt="Rowe Casa Logo" /></div>
+      <div style="width:56px"></div>
       <div class="header-center">
         <div class="title">WEEKLY SHIPSTATION LEADERBOARD</div>
         <div id="weekRange" class="meta">Week: loading…</div>
@@ -98,7 +94,6 @@
   const GID = '1113265790';
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-  // Robust CSV parser that handles quoted fields & commas
   function parseCSV(text){
     const rows = [];
     const lines = text.replace(/\r\n/g,'\n').split('\n');
@@ -126,7 +121,6 @@
     return rows;
   }
 
-  // Fetch CSV
   async function fetchCSV(){
     const res = await fetch(CSV_URL);
     if(!res.ok) throw new Error('Failed to load sheet — make sure it is shared or published. Status: '+res.status);
@@ -134,7 +128,6 @@
     return parseCSV(txt);
   }
 
-  // Find week range and last updated - scan first 8 rows
   function findMeta(grid){
     for(let r=0;r<8 && r<grid.length;r++){
       const text = (grid[r] || []).join(' ').trim();
@@ -153,49 +146,41 @@
     return null;
   }
 
-  // Find every "Rank" header across the sheet (looking for cells equal to 'Rank' or 'Rank ')
-  function findHeaderCells(grid){
+  function findRankHeaders(grid){
+    // collect all 'Rank' cells in the first 12 rows
     const headers = [];
-    for(let r=0;r<20 && r<grid.length;r++){
+    for(let r=0;r<12 && r<grid.length;r++){
       for(let c=0;c<(grid[r]||[]).length;c++){
         const cell = ((grid[r]||[])[c]||'').toString().trim().toLowerCase();
-        if(cell === 'rank'){
-          headers.push({row:r, col:c});
-        }
+        if(cell === 'rank') headers.push({row:r,col:c});
       }
     }
     return headers;
   }
 
-  // Extract block starting at header cell (col = rank column). Stop when employee cell blank for several rows
   function extractBlock(grid, header){
     const out = [];
-    const startR = header.row + 1;
+    const start = header.row + 1;
     const col = header.col;
     let empties = 0;
-    for(let r=startR;r<grid.length;r++){
+    for(let r=start;r<grid.length;r++){
       const row = grid[r] || [];
       const rank = (row[col] || '').toString().trim();
       const employee = (row[col+1] || '').toString().trim();
       const products = (row[col+2] || '').toString().trim();
       const orders = (row[col+3] || '').toString().trim();
       const avg = (row[col+4] || '').toString().trim();
-      if(!employee && !rank && !products && !orders && !avg){ empties++; if(empties>=3) break; else continue; }
+      if(!rank && !employee && !products && !orders && !avg){ empties++; if(empties>=3) break; else continue; }
       out.push({rank, employee, products, orders, avg});
     }
     return out;
   }
 
-  // Beautify numbers
   function nice(x){ if(!x) return ''; const n = Number(x.toString().replace(/[,]/g,'')); return Number.isFinite(n) ? n.toLocaleString() : x; }
 
-  // Build board card HTML
-  function buildCard(title, color, rows){
+  function buildCard(title,color,rows){
     const head = `<div class="card-head" style="background:${color}">🏆 ${title.toUpperCase()} 🏆</div>`;
-    if(!rows || rows.length===0) {
-      return `<div class="card">${head}<div class="card-body"><div class="empty">No data for this week</div></div></div>`;
-    }
-    // create table html; tbody will be populated and used for scrolling
+    if(!rows || rows.length===0) return `<div class="card">${head}<div class="card-body"><div class="empty">No data for this week</div></div></div>`;
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
       return `<tr class="${cls}"><td class="col-rank">${r.rank||''}</td><td class="col-employee">${r.employee||''}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
@@ -211,7 +196,6 @@
             <div class="scroll-wrapper" data-rows="${rows.length}" style="flex:1;position:relative">
               <div class="scroll-content" role="list" aria-label="${title} entries">
                 <table><tbody>${rowsHtml}</tbody></table>
-                <!-- duplicate for seamless scroll if needed via JS -->
               </div>
             </div>
           </div>
@@ -221,102 +205,70 @@
 
   try{
     const raw = await fetchCSV();
-    // get meta
     const meta = findMeta(raw);
     if(meta) document.getElementById('weekRange').textContent = meta.text.replace(/\s{2,}/g,' ').trim();
     const lu = findLastUpdated(raw);
     if(lu) document.getElementById('lastUpdated').textContent = lu.text.replace(/\s{2,}/g,' ').trim();
 
-    // find all 'rank' headers
-    const headerCells = findHeaderCells(raw);
-    // If fewer than 3 headers found, try to find "Full-time" titles and their following header row
-    if(headerCells.length < 3){
-      // attempt to search for text 'full-time' etc and then next row has 'Rank'
-      const labels = ['full-time','part-time','wholesale'];
-      for(let r=0;r<12 && headerCells.length<3;r++){
-        for(let c=0;c<(raw[r]||[]).length;c++){
-          const cell = ((raw[r]||[])[c]||'').toString().trim().toLowerCase();
-          if(labels.includes(cell)){
-            // look for 'rank' in the next few rows same columns
-            if(((raw[r+1]||[])[c]||'').toString().trim().toLowerCase() === 'rank'){
-              headerCells.push({row:r+1, col:c});
-            } else {
-              // try searching nearby columns
-              for(let cc=c; cc<c+6 && cc < (raw[r+1]||[]).length; cc++){
-                if(((raw[r+1]||[])[cc]||'').toString().trim().toLowerCase() === 'rank'){
-                  headerCells.push({row:r+1, col:cc});
-                }
-              }
-            }
-          }
-        }
-      }
+    // find headers; prefer detected locations, fallback to conventional columns
+    const headers = findRankHeaders(raw);
+    let chosen = headers.slice(0,3);
+    if(chosen.length < 3){
+      // fallback to expected indices: B(1), H(7), N(13)
+      const fallback = [{row:3,col:1},{row:3,col:7},{row:3,col:13}];
+      chosen = fallback.slice(0,3);
     }
 
-    // Sort headers left-to-right by column index and take first three
-    headerCells.sort((a,b)=>a.col - b.col);
-    const chosen = headerCells.slice(0,3);
+    chosen.sort((a,b)=>a.col - b.col);
 
-    // Titles and colors
     const cats = ['Full-time','Part-Time','Wholesale'];
     const cols = {'Full-time':'var(--ft)','Part-Time':'var(--pt)','Wholesale':'var(--wh)'};
-
-    const boardsEl = document.getElementById('boards');
-    boardsEl.innerHTML = '';
+    const boards = document.getElementById('boards');
+    boards.innerHTML = '';
 
     for(let i=0;i<3;i++){
       const h = chosen[i];
-      let rows = [];
-      if(h) rows = extractBlock(raw, h);
-      boardsEl.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
+      const rows = h ? extractBlock(raw,h) : [];
+      boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
     }
 
-    // Now set up smooth auto-scroll for each card's scroll-wrapper
+    // scrolling: duplicate and animate only when needed
     document.querySelectorAll('.scroll-wrapper').forEach(wrapper=>{
       const content = wrapper.querySelector('.scroll-content');
-      const tbody = content.querySelector('tbody');
-      // measure heights
-      // make content absolute and duplicated if needed for seamless scroll
-      // first, if content height less than wrapper, do nothing
-      // else duplicate and animate via JS
+      const inner = content.querySelector('table');
       setTimeout(()=>{
-        const contentHeight = content.scrollHeight;
+        const contentH = inner.scrollHeight;
         const wrapH = wrapper.clientHeight;
-        if(contentHeight > wrapH){
-          // duplicate inner HTML to create loop
+        if(contentH > wrapH){
+          // duplicate rows for loop
           content.innerHTML = content.innerHTML + content.innerHTML;
           let pos = 0;
-          let direction = 1; // scroll down
-          const speed = 30; // px per second
-          let rafId = null;
+          const speed = 28; // px/sec
+          let raf = null;
           let last = performance.now();
           function step(now){
             const delta = now - last;
             last = now;
-            pos += (speed * delta / 1000) * direction;
-            // when pos exceeds half of content (we duplicated) reset
-            const limit = content.scrollHeight/2;
-            if(pos >= limit) pos = 0;
+            pos += (speed * delta / 1000);
+            const half = content.scrollHeight / 2;
+            if(pos >= half) pos = 0;
             content.style.transform = `translateY(${-pos}px)`;
-            rafId = requestAnimationFrame(step);
+            raf = requestAnimationFrame(step);
           }
-          rafId = requestAnimationFrame(step);
-          // pause on hover
-          wrapper.addEventListener('mouseenter', ()=>{ if(rafId) cancelAnimationFrame(rafId); rafId = null; });
-          wrapper.addEventListener('mouseleave', ()=>{ if(!rafId){ last = performance.now(); rafId = requestAnimationFrame(step); } });
+          raf = requestAnimationFrame(step);
+          wrapper.addEventListener('mouseenter', ()=>{ if(raf) cancelAnimationFrame(raf); raf = null; });
+          wrapper.addEventListener('mouseleave', ()=>{ if(!raf){ last = performance.now(); raf = requestAnimationFrame(step); } });
         } else {
-          // center if short
-          content.style.top = '0';
+          // center small lists vertically
+          inner.style.marginTop = Math.max(0, (wrapH - contentH)/2) + 'px';
         }
       },120);
     });
 
-  } catch (err){
+  } catch(err){
     console.error(err);
-    const boardsEl = document.getElementById('boards');
-    boardsEl.innerHTML = `<div style="grid-column:1/-1;padding:18px;border-radius:8px;background:rgba(255,255,255,0.06);color:#fff">Error loading data: ${err.message}. Make sure the spreadsheet is published or "Anyone with the link" can view it.</div>`;
+    document.getElementById('boards').innerHTML = `<div class="notice">Error loading data: ${err.message}. Make sure the spreadsheet is published or "Anyone with the link" can view it.</div>`;
   }
-})();
-</script>
+})();</script>
 </body>
 </html>
