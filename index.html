@@ -27,9 +27,8 @@
       display:flex;align-items:center;gap:16px;padding:16px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;
     }
     .header-center{flex:1;text-align:center}
-    .title{font-weight:800;letter-spacing:1.5px;font-size:42px;margin:0;padding:0;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
-    .meta{font-size:24px;color:rgba(255,255,255,0.95);margin-top:10px;font-weight:600}
-    .submeta{display:none}
+    .title{font-weight:800;letter-spacing:1.5px;font-size:36px;margin:0;padding:0;text-shadow:2px 2px 4px rgba(0,0,0,0.3)}
+    .meta{font-size:22px;color:rgba(255,255,255,0.95);margin-top:10px;font-weight:600}
 
     /* Boards */
     .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
@@ -136,7 +135,6 @@
       <div class="header-center">
         <div class="title">WEEKLY SHIPSTATION LEADERBOARD</div>
         <div id="weekRange" class="meta">Week: loading…</div>
-        <div id="lastUpdated" class="submeta">Last Updated: —</div>
       </div>
       <div style="width:56px"></div>
     </div>
@@ -304,7 +302,6 @@
     
     const lu = findLastUpdated(raw);
     if(lu) {
-      document.getElementById('lastUpdated').textContent = lu.text.replace(/\s{2,}/g,' ').trim();
       log(`Found last updated: ${lu.text}`);
     }
 
