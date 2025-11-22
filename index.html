@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📊 Weekly Leaderboard Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -16,39 +17,37 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            overflow: hidden;
         }
         
         .container {
             max-width: 1900px;
             margin: 0 auto;
-            height: calc(100vh - 40px);
-            display: flex;
-            flex-direction: column;
         }
         
         .header {
             background: rgba(255, 255, 255, 0.95);
-            padding: 25px 30px;
-            border-radius: 15px 15px 0 0;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
+            margin-bottom: 30px;
         }
         
         .header h1 {
-            font-size: 2.5em;
+            font-size: 3em;
             color: #1a1a1a;
-            margin: 0 0 10px 0;
+            margin-bottom: 15px;
             font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         
         .refresh-info {
-            font-size: 0.95em;
+            font-size: 1em;
             color: #666;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
             flex-wrap: wrap;
         }
         
@@ -59,8 +58,8 @@
         }
         
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background: #34a853;
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -71,20 +70,122 @@
             50% { opacity: 0.5; }
         }
         
-        .dashboard-frame {
-            flex: 1;
-            background: white;
-            border-radius: 0 0 15px 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            position: relative;
+        .leaderboards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 25px;
+            margin-bottom: 80px;
         }
         
-        iframe {
+        .leaderboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .leaderboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .leaderboard-table {
             width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table thead {
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .leaderboard-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .leaderboard-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 1em;
+        }
+        
+        .leaderboard-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .leaderboard-table tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        .rank-cell {
+            font-weight: 700;
+            font-size: 1.2em;
+            width: 60px;
+            text-align: center;
+        }
+        
+        .rank-1 { color: #FFD700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .rank-2 { color: #C0C0C0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .rank-3 { color: #CD7F32; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        
+        .rank-badge {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            border-radius: 50%;
+            text-align: center;
+        }
+        
+        .rank-1-badge { background: linear-gradient(135deg, #FFD700, #FFA500); }
+        .rank-2-badge { background: linear-gradient(135deg, #C0C0C0, #A8A8A8); }
+        .rank-3-badge { background: linear-gradient(135deg, #CD7F32, #B8702F); }
+        
+        .name-cell {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05em;
+        }
+        
+        .metric-cell {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        .loading-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1em;
+            color: #e74c3c;
+            background: #fee;
+            border-radius: 10px;
+            margin: 20px;
         }
         
         .controls {
@@ -99,17 +200,17 @@
         
         .control-btn {
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px;
+            padding: 15px 30px;
             border-radius: 50px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 1em;
             font-weight: 600;
             transition: all 0.3s ease;
             border: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .control-btn:hover {
@@ -118,61 +219,24 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
         
-        .refresh-btn {
-            color: #667eea;
-        }
+        .refresh-btn { color: #667eea; }
+        .countdown-display { color: #764ba2; }
         
-        .countdown-display {
-            color: #764ba2;
-        }
-        
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        .loading-overlay.active {
-            display: flex;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @media (max-width: 1200px) {
+            .leaderboards-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 1.8em;
+                font-size: 2em;
             }
             
-            body {
+            .leaderboard-table th,
+            .leaderboard-table td {
                 padding: 10px;
-            }
-            
-            .refresh-info {
-                font-size: 0.85em;
-            }
-            
-            .control-btn {
-                font-size: 0.8em;
-                padding: 12px 20px;
+                font-size: 0.9em;
             }
             
             .controls {
@@ -197,24 +261,21 @@
                 </div>
                 <div class="info-item">
                     <span>📅</span>
-                    <span id="lastRefresh">Just now</span>
+                    <span id="lastRefresh">Loading...</span>
                 </div>
             </div>
         </div>
         
-        <div class="dashboard-frame">
-            <div class="loading-overlay" id="loadingOverlay">
-                <div class="spinner"></div>
+        <div class="leaderboards-grid" id="leaderboardsContainer">
+            <div class="loading-message">
+                <div style="font-size: 3em; margin-bottom: 20px;">⏳</div>
+                Loading leaderboard data...
             </div>
-            <iframe id="dashboardIframe" 
-                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg1IcVEFIHayTiwF/pubhtml?gid=1113265790&single=true&widget=true&headers=false&chrome=false"
-                title="Weekly Leaderboard Dashboard">
-            </iframe>
         </div>
     </div>
     
     <div class="controls">
-        <button class="control-btn refresh-btn" onclick="refreshDashboard()">
+        <button class="control-btn refresh-btn" onclick="loadAllLeaderboards()">
             🔄 Refresh Now
         </button>
         <div class="control-btn countdown-display">
@@ -223,7 +284,17 @@
     </div>
 
     <script>
-        let countdownSeconds = 300; // 5 minutes
+        // CONFIGURATION - UPDATE THESE WITH YOUR GOOGLE SHEETS INFO
+        const SPREADSHEET_ID = '1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg';
+        
+        // Define your leaderboards with their sheet GIDs and titles
+        const LEADERBOARDS = [
+            { gid: '1113265790', title: '🏆 Top Performers', columns: ['Rank', 'Name', 'Orders', 'Revenue'] },
+            { gid: 'ANOTHER_GID', title: '⚡ Speed Leaders', columns: ['Rank', 'Name', 'Avg Time', 'Total Orders'] },
+            { gid: 'THIRD_GID', title: '📦 Volume Champions', columns: ['Rank', 'Name', 'Packages', 'Weight'] }
+        ];
+        
+        let countdownSeconds = 300;
         let countdownInterval;
         
         function updateLastRefreshTime() {
@@ -236,29 +307,116 @@
             document.getElementById('lastRefresh').textContent = 'Last: ' + timeString;
         }
         
-        function showLoading() {
-            document.getElementById('loadingOverlay').classList.add('active');
+        async function fetchSheetData(gid) {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+            
+            return new Promise((resolve, reject) => {
+                Papa.parse(csvUrl, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => resolve(results.data),
+                    error: (error) => reject(error)
+                });
+            });
         }
         
-        function hideLoading() {
-            setTimeout(() => {
-                document.getElementById('loadingOverlay').classList.remove('active');
-            }, 500);
+        function createLeaderboardHTML(data, config) {
+            if (!data || data.length === 0) {
+                return `
+                    <div class="leaderboard-card">
+                        <div class="leaderboard-header">${config.title}</div>
+                        <div class="loading-message">No data available</div>
+                    </div>
+                `;
+            }
+            
+            // Get actual column names from data
+            const columns = Object.keys(data[0]);
+            
+            let tableHTML = `
+                <div class="leaderboard-card">
+                    <div class="leaderboard-header">${config.title}</div>
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                ${columns.map(col => `<th>${col}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            data.forEach((row, index) => {
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                
+                tableHTML += '<tr>';
+                
+                columns.forEach((col, colIndex) => {
+                    let cellClass = '';
+                    let cellContent = row[col] || '';
+                    
+                    // First column is typically rank
+                    if (colIndex === 0) {
+                        cellClass = `rank-cell ${rankClass}`;
+                        if (rank <= 3) {
+                            cellContent = `<span class="rank-badge rank-${rank}-badge">${cellContent}</span>`;
+                        }
+                    }
+                    // Second column is typically name
+                    else if (colIndex === 1) {
+                        cellClass = 'name-cell';
+                    }
+                    // Other columns are metrics
+                    else {
+                        cellClass = 'metric-cell';
+                    }
+                    
+                    tableHTML += `<td class="${cellClass}">${cellContent}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            return tableHTML;
         }
         
-        function refreshDashboard() {
-            const iframe = document.getElementById('dashboardIframe');
-            showLoading();
+        async function loadAllLeaderboards() {
+            const container = document.getElementById('leaderboardsContainer');
+            container.innerHTML = '<div class="loading-message"><div style="font-size: 3em; margin-bottom: 20px;">⏳</div>Loading leaderboard data...</div>';
             
-            // Add timestamp to force refresh
-            const baseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg1IcVEFIHayTiwF/pubhtml?gid=1113265790&single=true&widget=true&headers=false&chrome=false';
-            iframe.src = baseUrl + '&t=' + new Date().getTime();
-            
-            updateLastRefreshTime();
-            countdownSeconds = 300; // Reset countdown
-            
-            // Hide loading after iframe loads
-            iframe.onload = hideLoading;
+            try {
+                const leaderboardsHTML = [];
+                
+                for (const config of LEADERBOARDS) {
+                    try {
+                        const data = await fetchSheetData(config.gid);
+                        leaderboardsHTML.push(createLeaderboardHTML(data, config));
+                    } catch (error) {
+                        console.error(`Error loading leaderboard ${config.title}:`, error);
+                        leaderboardsHTML.push(`
+                            <div class="leaderboard-card">
+                                <div class="leaderboard-header">${config.title}</div>
+                                <div class="error-message">Error loading data</div>
+                            </div>
+                        `);
+                    }
+                }
+                
+                container.innerHTML = leaderboardsHTML.join('');
+                updateLastRefreshTime();
+                countdownSeconds = 300;
+                
+            } catch (error) {
+                console.error('Error loading leaderboards:', error);
+                container.innerHTML = '<div class="error-message">Failed to load leaderboards. Please check your configuration.</div>';
+            }
         }
         
         function startCountdown() {
@@ -268,7 +426,7 @@
                 countdownSeconds--;
                 
                 if (countdownSeconds <= 0) {
-                    refreshDashboard();
+                    loadAllLeaderboards();
                     countdownSeconds = 300;
                 }
                 
@@ -280,11 +438,8 @@
         }
         
         // Initialize
-        updateLastRefreshTime();
+        loadAllLeaderboards();
         startCountdown();
-        
-        // Hide loading on initial load
-        document.getElementById('dashboardIframe').onload = hideLoading;
     </script>
 </body>
 </html>
