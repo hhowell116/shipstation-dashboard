@@ -203,45 +203,6 @@
             color: #dc3545;
         }
         
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 1000;
-        }
-        
-        .control-btn {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .control-btn:hover {
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        .refresh-btn {
-            color: #667eea;
-        }
-        
-        .countdown-display {
-            color: #764ba2;
-        }
-        
         .loading-overlay {
             position: absolute;
             top: 0;
@@ -327,16 +288,6 @@
             .refresh-info {
                 font-size: 0.85em;
             }
-            
-            .control-btn {
-                font-size: 0.8em;
-                padding: 12px 20px;
-            }
-            
-            .controls {
-                flex-direction: column;
-                bottom: 10px;
-            }
         }
     </style>
 </head>
@@ -347,15 +298,11 @@
             <div class="refresh-info">
                 <div class="info-item">
                     <span class="status-dot"></span>
-                    <span>Live Dashboard</span>
-                </div>
-                <div class="info-item">
-                    <span>🕐</span>
-                    <span>Auto-refresh every 5 min</span>
+                    <span>Static Weekly View</span>
                 </div>
                 <div class="info-item">
                     <span>📅</span>
-                    <span id="lastRefresh">Just now</span>
+                    <span>Previous Week Performance</span>
                 </div>
             </div>
         </div>
@@ -376,22 +323,10 @@
             </div>
         </div>
     </div>
-    
-    <div class="controls">
-        <button class="control-btn refresh-btn" onclick="refreshDashboard()">
-            🔄 Refresh Now
-        </button>
-        <div class="control-btn countdown-display">
-            ⏱️ Next refresh: <span id="countdown">5:00</span>
-        </div>
-    </div>
 
     <script>
         // Configuration - Using your published Google Sheet
         const PUBLISHED_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShOvcg7Os-6aI1M1Y6fWCpkGvWTnzGleK3MMGnKBAixGHKGgJSKl365ln9KrWVDg1IcVEFIHayTiwF/pubhtml';
-        
-        let countdownSeconds = 300; // 5 minutes
-        let countdownInterval;
         
         // Function to parse HTML table data from published sheet
         async function fetchSheetData() {
@@ -399,6 +334,9 @@
             
             try {
                 const response = await fetch(PUBLISHED_SHEET_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const html = await response.text();
                 
                 // Parse the HTML to extract table data
@@ -483,6 +421,8 @@
                     const weekText = weekRangeCell.textContent.trim();
                     if (weekText.startsWith('Week:')) {
                         document.getElementById('weekRange').textContent = weekText;
+                    } else {
+                        document.getElementById('weekRange').textContent = 'Week: Previous Week';
                     }
                 }
                 
@@ -492,8 +432,15 @@
                     const updatedText = lastUpdatedCell.textContent.trim();
                     if (updatedText.startsWith('Last Updated:')) {
                         document.getElementById('lastUpdated').textContent = updatedText;
+                    } else {
+                        const now = new Date();
+                        document.getElementById('lastUpdated').textContent = 'Last Updated: ' + now.toLocaleDateString();
                     }
                 }
+            } else {
+                // Fallback if we can't extract from rows
+                document.getElementById('weekRange').textContent = 'Week: Previous Week';
+                document.getElementById('lastUpdated').textContent = 'Last Updated: ' + new Date().toLocaleDateString();
             }
         }
         
@@ -551,7 +498,7 @@
             tableContainer.className = 'leaderboard-table';
             
             if (data.length === 0) {
-                tableContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No data available</p>';
+                tableContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No data available for this week</p>';
                 leaderboardDiv.appendChild(tableContainer);
                 return leaderboardDiv;
             }
@@ -620,16 +567,9 @@
         function showError(message) {
             const container = document.getElementById('leaderboardsContainer');
             container.innerHTML = `<div class="error-message">${message}</div>`;
-        }
-        
-        function updateLastRefreshTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit',
-                hour12: true 
-            });
-            document.getElementById('lastRefresh').textContent = 'Last: ' + timeString;
+            
+            const weekInfoContainer = document.getElementById('weekInfoContainer');
+            weekInfoContainer.style.display = 'none';
         }
         
         function showLoading() {
@@ -642,36 +582,9 @@
             }, 500);
         }
         
-        async function refreshDashboard() {
-            const success = await fetchSheetData();
-            if (success) {
-                updateLastRefreshTime();
-                countdownSeconds = 300; // Reset countdown
-            }
-        }
-        
-        function startCountdown() {
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            countdownInterval = setInterval(() => {
-                countdownSeconds--;
-                
-                if (countdownSeconds <= 0) {
-                    refreshDashboard();
-                    countdownSeconds = 300;
-                }
-                
-                const mins = Math.floor(countdownSeconds / 60);
-                const secs = countdownSeconds % 60;
-                document.getElementById('countdown').textContent = 
-                    `${mins}:${secs.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
-        
-        // Initialize
+        // Initialize - load data once when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            refreshDashboard();
-            startCountdown();
+            fetchSheetData();
         });
     </script>
 </body>
