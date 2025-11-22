@@ -20,7 +20,7 @@
       --card-bg: rgba(255,255,255,0.98);
     }
     html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:linear-gradient(180deg,var(--bg-start),var(--bg-end));color:#111;}
-    .wrap{max-width:1400px;margin:18px auto;padding:18px;}
+    .wrap{max-width:1600px;margin:18px auto;padding:18px;}
     
     /* Header */
     .header{
@@ -33,7 +33,7 @@
 
     /* Boards */
     .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
-    .card{background:var(--card-bg);border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,10,0.35);display:flex;flex-direction:column;height:560px}
+    .card{background:var(--card-bg);border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,10,0.35);display:flex;flex-direction:column;height:650px}
     .card-head{padding:12px 14px;color:#fff;font-weight:700;text-align:center}
     .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:8px}
     table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
@@ -51,16 +51,16 @@
     tbody tr:nth-child(odd) td{background:var(--row-light)}
     tbody tr:nth-child(even) td{background:var(--row-dark)}
 
-    /* medals */
-    .medal-gold td{background:var(--gold);color:#000;font-weight:700}
-    .medal-silver td{background:var(--silver);color:#000;font-weight:700}
-    .medal-bronze td{background:var(--bronze);color:#000;font-weight:700}
+    /* medals - highlight entire row */
+    .medal-gold td{background:var(--gold) !important;color:#000;font-weight:700}
+    .medal-silver td{background:var(--silver) !important;color:#000;font-weight:700}
+    .medal-bronze td{background:var(--bronze) !important;color:#000;font-weight:700}
 
     /* empty state */
     .empty{color:#8a8f98;padding:20px;text-align:center;font-style:italic}
 
     /* responsive */
-    @media (max-width:1100px){.boards{grid-template-columns:1fr;}.col-employee{width:45vw} .card{height:520px}}
+    @media (max-width:1100px){.boards{grid-template-columns:1fr;}.col-employee{width:45vw} .card{height:600px}}
 
     /* scrolling wrapper */
     .scroll-wrapper{position:relative;flex:1;overflow:hidden}
@@ -73,9 +73,7 @@
 
     .notice{grid-column:1/-1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.04);color:#fff;text-align:center}
     
-    /* Debug info */
-    .debug{position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;border-radius:5px;font-family:monospace;font-size:11px;max-width:400px;z-index:9999;display:none}
-    .debug.show{display:block}
+
   </style>
 </head>
 <body>
@@ -95,7 +93,7 @@
     </div>
   </div>
   
-  <div id="debug" class="debug"></div>
+  <div id="debug" style="display:none"></div>
 
 <script>
 (async function(){
@@ -275,7 +273,7 @@
       boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
     }
 
-    // scrolling animation
+    // scrolling animation - scroll down then back up
     document.querySelectorAll('.scroll-wrapper').forEach(wrapper=>{
       const content = wrapper.querySelector('.scroll-content');
       const inner = content.querySelector('table');
@@ -283,17 +281,38 @@
         const contentH = inner.scrollHeight;
         const wrapH = wrapper.clientHeight;
         if(contentH > wrapH){
-          content.innerHTML = content.innerHTML + content.innerHTML;
           let pos = 0;
-          const speed = 28;
+          const scrollDistance = contentH - wrapH;
+          const speed = 30; // px/sec
+          let direction = 1; // 1 = down, -1 = up
           let raf = null;
           let last = performance.now();
+          let pauseUntil = 0;
+          
           function step(now){
+            // Pause at top and bottom
+            if(now < pauseUntil){
+              raf = requestAnimationFrame(step);
+              return;
+            }
+            
             const delta = now - last;
             last = now;
-            pos += (speed * delta / 1000);
-            const half = content.scrollHeight / 2;
-            if(pos >= half) pos = 0;
+            pos += (speed * delta / 1000) * direction;
+            
+            // Reached bottom, pause then reverse
+            if(pos >= scrollDistance){
+              pos = scrollDistance;
+              direction = -1;
+              pauseUntil = now + 2000; // pause 2 seconds at bottom
+            }
+            // Reached top, pause then go down
+            else if(pos <= 0){
+              pos = 0;
+              direction = 1;
+              pauseUntil = now + 2000; // pause 2 seconds at top
+            }
+            
             content.style.transform = `translateY(${-pos}px)`;
             raf = requestAnimationFrame(step);
           }
@@ -307,10 +326,7 @@
     });
 
     log('✓ Dashboard loaded successfully!');
-    // Hide debug after 5 seconds if successful
-    setTimeout(() => {
-      if(debugEl) debugEl.classList.remove('show');
-    }, 5000);
+    // Debug panel is now hidden permanently
 
   } catch(err){
     log(`ERROR: ${err.message}`, true);
