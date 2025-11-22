@@ -5,311 +5,279 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>WEEKLY SHIPSTATION LEADERBOARD</title>
   <style>
-    /* Page-wide */
-    :root{
-      --bg:#0f1720;
-      --accent:#1a1a1a;
-      --ft:#34a853;
-      --pt:#4285f4;
-      --wh:#f57c00;
-      --gold:#ffd700;
-      --silver:#c0c0c0;
-      --bronze:#cd7f32;
+    :root {
+      --bg-start: #1e293b;
+      --bg-end: #334155;
+      --ft: #34a853;
+      --pt: #4285f4;
+      --wh: #f57c00;
+      --gold: #ffd700;
+      --silver: #c0c0c0;
+      --bronze: #cd7f32;
+      --row-light: #f8f9fa;
+      --row-dark: #e9ecef;
     }
-    html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:#f4f6f8;color:#111}
-    .page{max-width:1400px;margin:18px auto;padding:12px}
-    /* Title bar */
-    .titlebar{
-      background: linear-gradient(180deg,var(--bg),#111);
-      color:white;padding:10px 18px;border-radius:6px;display:flex;flex-direction:column;align-items:center;box-shadow:0 6px 18px rgba(4,4,10,0.25)
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Inter, sans-serif;
+      background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
+      color: #111;
     }
-    .titlebar h1{margin:6px 0;font-size:22px;letter-spacing:1px}
-    .meta{font-size:13px;color:#d1d5db;margin:4px 0}
-    /* Board containers */
-    .boards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:18px}
-    .board{background:white;border-radius:6px;overflow:hidden;box-shadow:0 6px 18px rgba(12,12,20,0.06)}
-    .board .board-head{padding:8px 12px;color:white;text-align:center;font-weight:700}
-    .board table{width:100%;border-collapse:collapse;font-size:13px}
-    .board thead th{padding:8px 10px;text-align:center;color:#fff;font-weight:700}
-    .board tbody td{padding:8px 10px;text-align:center;border-bottom:1px solid #e9ecef}
-    .rank-badge{display:inline-block;width:28px;height:22px;border-radius:4px;background:#111;color:#fff;line-height:22px;font-weight:700}
-    /* medal rows */
-    .medal-gold td{background:var(--gold);font-weight:700;color:#000}
-    .medal-silver td{background:var(--silver);font-weight:700;color:#000}
-    .medal-bronze td{background:var(--bronze);font-weight:700;color:#000}
-    /* thin alternate */
-    .alt-row td{background:#fbfcfd}
-    /* header small */
-    .small{font-size:12px;color:#666}
-    /* responsive */
-    @media (max-width:1100px){.boards{grid-template-columns:1fr}}
-    /* fixed widths to match your sheet look */
-    .col-rank{width:68px}
-    .col-employee{width:260px;text-align:left;padding-left:14px}
-    .col-prod{width:130px}
-    .col-orders{width:100px}
-    .col-avg{width:120px}
+
+    .page {
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    .titlebar {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 16px 20px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    }
+
+    .titlebar h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 1px;
+    }
+
+    .meta {
+      font-size: 14px;
+      margin-top: 4px;
+      color: #d1d5db;
+    }
+
+    .boards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .board {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 500px; /* fixed height */
+      position: relative;
+    }
+
+    .board-head {
+      padding: 12px;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 12px 10px;
+      text-align: center;
+      color: white;
+      font-weight: 700;
+    }
+
+    tbody {
+      /* wrap the table body in a scrollable container */
+      display: block;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: var(--row-light);
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: var(--row-dark);
+    }
+
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #dee2e6;
+      word-break: break-word;
+    }
+
+    .rank-badge {
+      display: inline-block;
+      width: 28px;
+      height: 22px;
+      border-radius: 4px;
+      background: #111;
+      color: white;
+      line-height: 22px;
+      font-weight: bold;
+    }
+
+    .medal-gold td { background: var(--gold); color: #000; font-weight: bold; }
+    .medal-silver td { background: var(--silver); color: #000; font-weight: bold; }
+    .medal-bronze td { background: var(--bronze); color: #000; font-weight: bold; }
+
+    /* Auto scroll keyframes */
+    @keyframes scrollUpDown {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-50%); }
+      100% { transform: translateY(0); }
+    }
+
+    .auto-scroll {
+      animation: scrollUpDown 30s linear infinite;
+      will-change: transform;
+    }
+
+    /* Fix column widths */
+    .col-rank { width: 60px; }
+    .col-employee { width: 240px; text-align: left; padding-left: 12px; }
+    .col-prod { width: 120px; }
+    .col-orders { width: 100px; }
+    .col-avg { width: 110px; }
+
   </style>
 </head>
 <body>
-  <div class="page" id="app">
-    <div class="titlebar" id="titleBar">
+  <div class="page">
+    <div class="titlebar">
       <h1>WEEKLY SHIPSTATION LEADERBOARD</h1>
       <div class="meta" id="weekRange">Week: loading…</div>
-      <div class="small" id="lastUpdated">Last Updated: —</div>
+      <div class="meta small" id="lastUpdated">Last Updated: —</div>
     </div>
 
-    <div style="height:10px"></div>
-
-    <div id="loading" style="text-align:center;color:#6b7280">Loading leaderboard data…</div>
-
-    <div class="boards" id="boards" style="display:none">
-      <!-- 3 boards injected here -->
-    </div>
+    <div id="boards" class="boards"></div>
   </div>
 
-<script>
-(async function(){
-  // CONFIG - your sheet id & gid (already provided)
-  const SHEET_ID = '1HYfTADTvqpOMByLHcNPrgu8ahY58AZmdxaVgKbfQlMQ';
-  const GID = '1113265790';
+  <script>
+  (async function(){
+    const SHEET_ID = '1HYfTADTvqpOMByLHcNPrgu8ahY58AZmdxaVgKbfQlMQ';
+    const GID = '1113265790';
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-  // CSV export URL (requires 'Anyone with link' or published)
-  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-
-  // helper: robust csv parser (handles quoted fields)
-  function parseCSV(text){
-    const rows = [];
-    const pattern = /(?:\s*|^)(?:"([^"]*(?:""[^"]*)*)"|([^,]*))(?:,|$)/g;
-    const lines = text.replace(/\r\n/g,"\n").split("\n");
-    for(const line of lines){
-      if(line.trim()==="") { rows.push([]); continue; }
-      const row = [];
-      let m;
-      pattern.lastIndex = 0;
-      while((m = pattern.exec(line)) !== null){
-        let val = m[1] !== undefined ? m[1].replace(/""/g,'"') : m[2];
-        row.push(val === undefined ? '' : val);
-        if(m[0].length === 0) break;
-      }
-      rows.push(row);
+    function parseCSV(text){
+      const lines = text.replace(/\r\n/g,"\n").split("\n");
+      return lines.map(line => {
+        // simple split (handles commas in most cases)
+        return line.split(',').map(cell => cell.replace(/(^"|"$)/g, '').replace(/""/g,'"'));
+      });
     }
-    return rows;
-  }
 
-  // fetch csv
-  async function fetchSheetCSV(){
-    const res = await fetch(CSV_URL);
-    if(!res.ok) throw new Error('Failed to load sheet (check sharing/publish). Status: '+res.status);
-    const txt = await res.text();
-    return parseCSV(txt);
-  }
-
-  // find top meta (week range & last updated) - look for 'Week' or date-like text near top
-  function findTopMeta(grid){
-    for(let r=0;r<6 && r<grid.length;r++){
-      const row = grid[r].join(' ').trim();
-      if(!row) continue;
-      // find 'Week' or 'WEEK' or 'Week:' or Month words
-      if(/week[:\s]/i.test(row) || /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/i.test(row)){
-        return { rowIndex: r, text: row };
-      }
+    function fetchCSV(){
+      return fetch(CSV_URL).then(r => r.text()).then(parseCSV);
     }
-    return null;
-  }
 
-  // find header row that contains 'Rank' 'Employee' 'Products' within first 12 rows
-  function findLeaderboardHeaders(grid){
-    const headers = [];
-    for(let r=0;r<20 && r<grid.length;r++){
-      const row = grid[r].map(c => (c||'').toString().trim().toLowerCase());
-      if(row.includes('rank') && row.includes('employee') && (row.includes('products') || row.includes('products shipped') || row.includes('products shipped'))){
-        // find start columns where 'rank' occurs - there may be three occurrences across the row
-        for(let c=0;c<row.length;c++){
-          if(row[c] === 'rank'){
-            // ensure following columns look like Employee, Products, Orders, Avg
-            const slice = row.slice(c, c+6).map(x=>x||'');
-            if(slice.includes('employee') && (slice.includes('products') || slice.includes('products shipped'))) {
-              headers.push({row:r, col:c});
-            }
-          }
+    function findMeta(rows){
+      for(let i=0;i<5;i++){
+        const row = rows[i].join(' ');
+        if (/week:/i.test(row)) {
+          return row;
         }
       }
-    }
-    return headers;
-  }
-
-  // extract region under a header until an empty employee cell encountered
-  function extractBlock(grid, header){
-    const r = header.row;
-    const c = header.col;
-    const out = [];
-    // locate header labels to confirm widths; we'll extract 5 columns: rank, employee, products, orders, avg
-    const maxRows = grid.length;
-    for(let rr = r+1; rr<maxRows; rr++){
-      const cells = grid[rr];
-      if(!cells) break;
-      const employee = (cells[c+1] || '').toString().trim();
-      const rank = (cells[c] || '').toString().trim();
-      const products = (cells[c+2] || '').toString().trim();
-      const orders = (cells[c+3] || '').toString().trim();
-      const avg = (cells[c+4] || '').toString().trim();
-      // stop if row is mostly empty
-      if(!employee && !rank && !products && !orders && !avg) break;
-      // sometimes header rows repeat; skip rows where 'Rank' is present
-      const lowerRow = (Object.values(cells).join(' ')||'').toLowerCase();
-      if(/rank\s+employee/i.test(lowerRow) || lowerRow.includes('rank employee')) continue;
-      // push only if there's an employee or products
-      if(employee || products || orders || avg) {
-        out.push({
-          rank: rank || '',
-          employee: employee || '',
-          products: products || '',
-          orders: orders || '',
-          avg: avg || ''
-        });
-      }
-    }
-    return out;
-  }
-
-  // beautify numbers (pass-through if non-numeric)
-  function beautify(x){ if(!x) return ''; const n = Number(x.toString().replace(/[,]/g,'')); return Number.isFinite(n) ? n.toLocaleString() : x; }
-
-  // build board HTML
-  function buildBoardHTML(title,color,rows){
-    const h = `<div class="board">
-      <div class="board-head" style="background:${color}">🏆 ${title.toUpperCase()} 🏆</div>
-      <table role="table" aria-label="${title} leaderboard">
-        <thead><tr>
-          <th class="col-rank">Rank</th>
-          <th class="col-employee">Employee</th>
-          <th class="col-prod">Products</th>
-          <th class="col-orders">Orders</th>
-          <th class="col-avg">Avg/Order</th>
-        </tr></thead>
-        <tbody>
-          ${rows.map((r,i)=>{
-            const cls = i===0? 'medal-gold' : i===1? 'medal-silver' : i===2? 'medal-bronze' : (i>=3 && i%2===1? 'alt-row':'');
-            return `<tr class="${cls}">
-              <td class="col-rank">${r.rank}</td>
-              <td class="col-employee">${r.employee}</td>
-              <td class="col-prod">${beautify(r.products)}</td>
-              <td class="col-orders">${beautify(r.orders)}</td>
-              <td class="col-avg">${r.avg}</td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-    </div>`;
-    return h;
-  }
-
-  // MAIN
-  try{
-    const raw = await fetchSheetCSV();
-    // raw is array of rows (arrays)
-    // find Week range
-    const meta = findTopMeta(raw);
-    if(meta) {
-      // try to find the first substring that looks like 'Week:' or date range
-      const text = meta.text;
-      const weekMatch = text.match(/week[:\s]*([^\n\r]*)/i);
-      if(weekMatch && weekMatch[1]) {
-        document.getElementById('weekRange').textContent = weekMatch[0].trim();
-      } else {
-        // fallback: look for something like "Nov 09 - Nov 15"
-        const dateRange = text.match(/([A-Za-z]{3}\s*\d{1,2}).*?(-|\u2013).*?([A-Za-z]{3}\s*\d{1,2},?\s*\d{0,4})/);
-        if(dateRange) document.getElementById('weekRange').textContent = 'Week: ' + dateRange[0];
-        else document.getElementById('weekRange').textContent = text;
-      }
-    } else {
-      document.getElementById('weekRange').textContent = 'Week: Unknown';
+      return '';
     }
 
-    // try Last Updated
-    let lastUpdated = '—';
-    for(let r=0; r<6 && r<raw.length; r++){
-      const rowText = raw[r].join(' ');
-      if(/Last Updated/i.test(rowText)){
-        lastUpdated = rowText.replace(/.*Last Updated[:\s]*/i,'').trim() || rowText;
-        break;
-      }
-    }
-    document.getElementById('lastUpdated').textContent = 'Last Updated: ' + lastUpdated;
-
-    // find header positions
-    const heads = findLeaderboardHeaders(raw);
-    if(heads.length < 1){
-      // fallback: attempt scanning top rows for 'Full-time' 'Part-Time' 'Wholesale' titles
-      // if we can't find anything, throw
-      console.warn('No explicit header rows found; attempting heuristic scan.');
-    }
-
-    // we expect up to three header occurrences (left to right)
-    // if 3 found use them; otherwise attempt heuristic column positions
-    const chosenHeaders = heads.length >= 3 ? heads.slice(0,3) : [];
-
-    // if we didn't find headers, try to detect titles like 'FULL-TIME' etc in upper rows to anchor columns
-    if(chosenHeaders.length < 3){
-      // scan first 12 rows for cells containing 'full-time' 'part-time' 'wholesale'
-      const mapTitles = {'full-time':'Full-time','part-time':'Part-Time','wholesale':'Wholesale'};
-      for(let r=0;r<12 && r<raw.length;r++){
-        for(let c=0;c<raw[r].length;c++){
-          const cell = (raw[r][c]||'').toString().toLowerCase().trim();
-          if(cell in mapTitles){
-            // look for a 'Rank' cell in same row or the row+1
-            let headerRow = -1;
-            if((raw[r+1]||[]).map(x=> (x||'').toString().toLowerCase()).includes('rank')) headerRow = r+1;
-            else if((raw[r]||[]).map(x=> (x||'').toString().toLowerCase()).includes('rank')) headerRow = r;
-            if(headerRow >= 0) chosenHeaders.push({row: headerRow, col: raw[r].findIndex(x => (x||'').toString().toLowerCase().trim()===cell)});
-          }
+    function findLastUpdated(rows){
+      for(let i=0;i<5;i++){
+        const row = rows[i].join(' ');
+        if (/last updated/i.test(row)) {
+          return row;
         }
       }
+      return '';
     }
 
-    // final fallback: if still none, attempt to find any 'Rank' cells across top rows and take the first three
-    if(chosenHeaders.length === 0){
-      for(let r=0;r<12 && r<raw.length;r++){
-        for(let c=0;c<raw[r].length;c++){
-          if((raw[r][c]||'').toString().toLowerCase().trim() === 'rank'){
-            chosenHeaders.push({row:r, col:c});
-            if(chosenHeaders.length===3) break;
-          }
+    function findHeaderRows(rows){
+      const headers = [];
+      for(let r=0; r<rows.length; r++){
+        const row = rows[r].map(c => (c||'').toLowerCase());
+        if (row.includes('rank') && row.includes('employee') && row.includes('products')) {
+          headers.push({r, row});
         }
-        if(chosenHeaders.length===3) break;
       }
+      return headers;
     }
 
-    // sort chosenHeaders by column position (left to right)
-    chosenHeaders.sort((a,b)=>a.col - b.col);
-
-    // map to categories (if header labels appear include category)
-    const cats = ['Full-time','Part-Time','Wholesale'];
-    const colors = {'Full-time': 'var(--ft)', 'Part-Time': 'var(--pt)', 'Wholesale': 'var(--wh)'};
-    const boardsContainer = document.getElementById('boards');
-    boardsContainer.innerHTML = '';
-
-    for(let i=0;i<3;i++){
-      const header = chosenHeaders[i];
-      if(!header) {
-        // no header - render empty board
-        boardsContainer.insertAdjacentHTML('beforeend', buildBoardHTML(cats[i], colors[cats[i]], []));
-        continue;
+    function extractBlock(rows, headerInfo, colIndex){
+      const block = [];
+      for (let r = headerInfo.r + 1; r < rows.length; r++) {
+        const row = rows[r];
+        const rank = row[colIndex];
+        const name = row[colIndex + 1];
+        const prod = row[colIndex + 2];
+        const orders = row[colIndex + 3];
+        const avg = row[colIndex + 4];
+        if (!name && !rank && !prod && !orders && !avg) break;
+        block.push({rank, name, prod, orders, avg});
       }
-      const block = extractBlock(raw, header);
-      boardsContainer.insertAdjacentHTML('beforeend', buildBoardHTML(cats[i], colors[cats[i]], block));
+      return block;
     }
 
-    // done
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('boards').style.display = 'grid';
+    const raw = await fetchCSV();
+    // Set meta
+    const week = findMeta(raw);
+    const updated = findLastUpdated(raw);
+    document.getElementById('weekRange').textContent = week;
+    document.getElementById('lastUpdated').textContent = updated;
 
-  } catch (err) {
-    console.error(err);
-    document.getElementById('loading').textContent = 'Error loading sheet: ' + err.message + '. Make sure the sheet is shared/published.';
-  }
-})();
-</script>
+    const headerRows = findHeaderRows(raw);
+
+    // assume three header rows, roughly in left-to-right
+    const boardsEl = document.getElementById('boards');
+    const categories = ['Full-time','Part-Time','Wholesale'];
+    const colors = {'Full-time':'var(--ft)','Part-Time':'var(--pt)','Wholesale':'var(--wh)'};
+
+    for (let i = 0; i < 3; i++) {
+      const hdr = headerRows[i];
+      let block = [];
+      if (hdr) block = extractBlock(raw, hdr, hdr.row.indexOf('rank'));
+      const tableHtml = `
+        <div class="board">
+          <div class="board-head" style="background:${colors[categories[i]]}">
+            🏆 ${categories[i].toUpperCase()} 🏆
+          </div>
+          <div class="body-wrapper" style="overflow:hidden; flex:1; position:relative;">
+            <table>
+              <thead><tr>
+                <th class="col-rank">Rank</th><th class="col-employee">Employee</th>
+                <th class="col-prod">Products</th><th class="col-orders">Orders</th>
+                <th class="col-avg">Avg/Order</th>
+              </tr></thead>
+              <tbody class="auto-scroll">
+                ${block.map((r, idx) => {
+                  const cls = idx === 0 ? 'medal-gold'
+                    : idx === 1 ? 'medal-silver'
+                    : idx === 2 ? 'medal-bronze'
+                    : '';
+                  return `<tr class="${cls}">
+                    <td>${r.rank}</td><td>${r.name}</td><td>${r.prod}</td><td>${r.orders}</td><td>${r.avg}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+      boardsEl.insertAdjacentHTML('beforeend', tableHtml);
+    }
+
+  })();
+  </script>
 </body>
 </html>
