@@ -74,7 +74,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 25px;
-            margin-bottom: 80px;
+            margin-bottom: 30px;
         }
         
         .leaderboard-card {
@@ -188,39 +188,7 @@
             margin: 20px;
         }
         
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 1000;
-        }
-        
-        .control-btn {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 30px;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .control-btn:hover {
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        .refresh-btn { color: #667eea; }
-        .countdown-display { color: #764ba2; }
+
         
         @media (max-width: 1200px) {
             .leaderboards-grid {
@@ -252,14 +220,6 @@
             <h1>📊 WEEKLY SHIPSTATION LEADERBOARD</h1>
             <div class="refresh-info">
                 <div class="info-item">
-                    <span class="status-dot"></span>
-                    <span>Live Dashboard</span>
-                </div>
-                <div class="info-item">
-                    <span>🕐</span>
-                    <span>Auto-refresh every 5 min</span>
-                </div>
-                <div class="info-item">
                     <span>📅</span>
                     <span id="lastRefresh">Loading...</span>
                 </div>
@@ -273,15 +233,6 @@
             </div>
         </div>
     </div>
-    
-    <div class="controls">
-        <button class="control-btn refresh-btn" onclick="loadAllLeaderboards()">
-            🔄 Refresh Now
-        </button>
-        <div class="control-btn countdown-display">
-            ⏱️ Next refresh: <span id="countdown">5:00</span>
-        </div>
-    </div>
 
     <script>
         // CONFIGURATION - UPDATE THESE WITH YOUR GOOGLE SHEETS INFO
@@ -289,13 +240,8 @@
         
         // Define your leaderboards with their sheet GIDs and titles
         const LEADERBOARDS = [
-            { gid: '1113265790', title: '🏆 Top Performers', columns: ['Rank', 'Name', 'Orders', 'Revenue'] },
-            { gid: 'ANOTHER_GID', title: '⚡ Speed Leaders', columns: ['Rank', 'Name', 'Avg Time', 'Total Orders'] },
-            { gid: 'THIRD_GID', title: '📦 Volume Champions', columns: ['Rank', 'Name', 'Packages', 'Weight'] }
+            { gid: '1113265790', title: '🏆 Top Performers' }
         ];
-        
-        let countdownSeconds = 300;
-        let countdownInterval;
         
         function updateLastRefreshTime() {
             const now = new Date();
@@ -304,7 +250,7 @@
                 minute: '2-digit',
                 hour12: true 
             });
-            document.getElementById('lastRefresh').textContent = 'Last: ' + timeString;
+            document.getElementById('lastRefresh').textContent = 'Last updated: ' + timeString;
         }
         
         async function fetchSheetData(gid) {
@@ -411,7 +357,6 @@
                 
                 container.innerHTML = leaderboardsHTML.join('');
                 updateLastRefreshTime();
-                countdownSeconds = 300;
                 
             } catch (error) {
                 console.error('Error loading leaderboards:', error);
@@ -419,27 +364,8 @@
             }
         }
         
-        function startCountdown() {
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            countdownInterval = setInterval(() => {
-                countdownSeconds--;
-                
-                if (countdownSeconds <= 0) {
-                    loadAllLeaderboards();
-                    countdownSeconds = 300;
-                }
-                
-                const mins = Math.floor(countdownSeconds / 60);
-                const secs = countdownSeconds % 60;
-                document.getElementById('countdown').textContent = 
-                    `${mins}:${secs.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
-        
-        // Initialize
+        // Load leaderboards on page load
         loadAllLeaderboards();
-        startCountdown();
     </script>
 </body>
 </html>
