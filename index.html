@@ -50,7 +50,7 @@
     tbody tr{display:table;width:100%;table-layout:fixed;color:#fff}
     td{padding:16px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;word-break:break-word;font-size:17px}
     .col-rank{width:80px;font-size:20px;font-weight:700}
-    .col-employee{width:auto;text-align:left;padding-left:16px;font-size:18px;font-weight:600}
+    .col-employee{width:auto;text-align:left;padding-left:16px;font-size:18px;font-weight:600;white-space:nowrap;overflow:visible}
     .col-prod{width:110px;font-size:18px;font-weight:600}
     .col-orders{width:100px;font-size:18px;font-weight:600}
     .col-avg{width:130px;font-size:18px;font-weight:600}
@@ -261,11 +261,12 @@
   }
 
   function buildCard(title,color,rows){
-    const head = `<div class="card-head" style="background:${color}">🏆 ${title.toUpperCase()} 🏆</div>`;
+    const head = `<div class="card-head" style="background:${color}">${title.toUpperCase()}</div>`;
     if(!rows || rows.length===0) return `<div class="card">${head}<div class="card-body"><div class="empty">No data for this week</div></div></div>`;
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
-      return `<tr class="${cls}"><td class="col-rank">${r.rank||''}</td><td class="col-employee">${r.employee||''}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
+      const displayRank = (idx + 1).toString();
+      return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${r.employee||''}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
     }).join('');
     return `
       <div class="card">
