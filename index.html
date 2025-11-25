@@ -365,18 +365,17 @@
           let direction = 1;
           let last = performance.now();
           let pauseUntil = 0;
-          let isPaused = false;
           
           function step(now){
-            // Handle pausing
-            if(now < pauseUntil){
+            // Check if we're in pause period
+            if(pauseUntil > 0 && now < pauseUntil){
               requestAnimationFrame(step);
               return;
             }
             
-            // If we just finished pausing, reset the timer
-            if(isPaused){
-              isPaused = false;
+            // Resume after pause - reset last timestamp
+            if(pauseUntil > 0 && now >= pauseUntil){
+              pauseUntil = 0;
               last = now;
             }
             
@@ -385,18 +384,16 @@
             pos += (speed * delta / 1000) * direction;
             
             // Reached bottom - pause then reverse
-            if(direction === 1 && pos >= scrollDistance){
+            if(pos >= scrollDistance){
               pos = scrollDistance;
               direction = -1;
               pauseUntil = now + 2000;
-              isPaused = true;
             }
             // Reached top - pause then go down
-            else if(direction === -1 && pos <= 0){
+            else if(pos <= 0){
               pos = 0;
               direction = 1;
               pauseUntil = now + 2000;
-              isPaused = true;
             }
             
             inner.style.transform = `translateY(${-pos}px)`;
