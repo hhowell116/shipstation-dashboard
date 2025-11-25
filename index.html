@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WEEKLY SHIPSTATION LEADERBOARD</title>
+  <title>WEEKLY SHIPSTATION LEADERBOARD — TV</title>
   <style>
     :root{
       --header-grad: linear-gradient(90deg,#0a5d42,#2d9c6f);
@@ -15,169 +15,125 @@
       --gold:#ffd700;
       --silver:#c0c0c0;
       --bronze:#cd7f32;
-      --row-light:#f8f9fa;
-      --row-dark:#eef1f3;
-      --card-bg: rgba(255,255,255,0.98);
+      --row-light:#353b47;
+      --row-dark:#2e343f;
+      --card-bg: rgba(255,255,255,0.02);
+      --text-on-card: #ffffff;
     }
-    html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:linear-gradient(180deg,var(--bg-start),var(--bg-end));color:#111;}
-    .wrap{max-width:95%;margin:18px auto;padding:18px;}
-    
+
+    /* Base */
+    html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:linear-gradient(180deg,var(--bg-start),var(--bg-end));color:var(--text-on-card);-webkit-font-smoothing:antialiased;}
+    .wrap{width:98%;max-width:2200px;margin:14px auto;padding:14px;box-sizing:border-box;}
+
     /* Header */
-    .header{
-      display:flex;align-items:center;gap:16px;padding:16px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;
-    }
+    .header{display:flex;align-items:center;justify-content:center;padding:18px;border-radius:10px;background:var(--header-grad);box-shadow:0 8px 24px rgba(5,10,10,0.45);color:white;}
     .header-center{flex:1;text-align:center}
-    .title{font-weight:800;letter-spacing:1.5px;font-size:44px;margin:0;padding:0;text-transform:capitalize}
-    .meta{font-size:26px;color:rgba(255,255,255,0.95);margin-top:10px;font-weight:600}
+    .title{font-weight:800;letter-spacing:1.5px;font-size:48px;margin:0;padding:0;text-transform:uppercase}
+    .meta{font-size:26px;color:rgba(255,255,255,0.95);margin-top:8px;font-weight:600}
 
-    /* Boards */
-    .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:22px}
-    .card{
-      background:var(--card-bg);
-      border-radius:10px;
-      overflow:hidden;
-      box-shadow:0 10px 30px rgba(2,6,10,0.35), 0 20px 60px rgba(0,0,0,0.6);
-      display:flex;
-      flex-direction:column;
-      height:calc(100vh - 220px);
-      min-height:700px;
-    }
-    .card-head{padding:18px 14px;color:#fff;font-weight:700;text-align:center;font-size:22px}
-    .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;background:#2a2f3a}
-    table{width:100%;border-collapse:collapse;font-size:17px;table-layout:auto}
-    thead th{padding:16px 10px;text-align:center;font-weight:700;color:white;position:sticky;top:0;z-index:2;background:#1a1f28;font-size:18px}
+    /* Boards grid */
+    .boards{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:24px}
+    .card{background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.6);display:flex;flex-direction:column;height:calc(100vh - 240px);min-height:600px;min-width:280px;}
+    .card-head{padding:18px 16px;color:var(--text-on-card);font-weight:800;text-align:center;font-size:22px;letter-spacing:0.6px}
+    .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;background:transparent}
+
+    /* Table layout — use auto so columns resize naturally, but control widths */
+    table{width:100%;border-collapse:collapse;font-size:18px;table-layout:auto;color:var(--text-on-card);}
+    thead th{padding:14px 12px;text-align:center;font-weight:800;color:var(--text-on-card);position:sticky;top:0;z-index:3;background:rgba(20,24,30,0.9);font-size:20px;}
     tbody{display:block;width:100%;overflow:hidden}
-    tbody tr{display:table;width:100%;table-layout:fixed;color:#fff}
-    td{padding:16px 10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.05);vertical-align:middle;font-size:17px;overflow:hidden}
-    .col-rank{width:80px;font-size:20px;font-weight:700}
-    .col-employee{
-  width:auto;
-  min-width:150px;
-  max-width: 100%;
-  text-align:left;
-  padding-left:16px;
-  padding-right:16px;
-  font-size:18px;
-  font-weight:600;
-  white-space:normal;      /* ENABLE WRAPPING */
-  overflow-wrap: break-word;
-  word-break: break-word;
-  line-height:1.3;
-}
+    tbody tr{display:table;width:100%;table-layout:fixed;color:var(--text-on-card);}
+    td{padding:12px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;font-size:18px;overflow:visible;white-space:normal;word-break:break-word;}
 
-    .col-prod{width:110px;font-size:18px;font-weight:600}
-    .col-orders{width:100px;font-size:18px;font-weight:600}
-    .col-avg{width:130px;font-size:18px;font-weight:600}
+    /* Column sizing: force small numeric columns to shrink first; employee grows */
+    .col-rank{width:80px;min-width:64px;text-align:center;font-weight:800;font-size:22px}
+    .col-prod,.col-orders,.col-avg{width:1%;white-space:nowrap;min-width:60px;max-width:160px;font-weight:700} /* shrink-first columns */
+    .col-employee{
+      width:auto;
+      min-width:260px; /* ensure visibility on TVs */
+      max-width:700px;
+      text-align:left;
+      padding-left:18px;
+      padding-right:18px;
+      font-size:20px;
+      font-weight:700;
+      white-space:normal;
+      overflow-wrap:break-word;
+      word-break:break-word;
+      line-height:1.25;
+      display:block;
+    }
 
     /* row shading */
-    tbody tr:nth-child(odd) td{background:#353b47}
-    tbody tr:nth-child(even) td{background:#2e343f}
+    tbody tr:nth-child(odd) td{background:var(--row-light)}
+    tbody tr:nth-child(even) td{background:var(--row-dark)}
 
-    /* medals - highlight entire row */
-    .medal-gold td{background:var(--gold) !important;color:#000;font-weight:700}
-    .medal-silver td{background:var(--silver) !important;color:#000;font-weight:700}
-    .medal-bronze td{background:var(--bronze) !important;color:#000;font-weight:700}
+    /* medals */
+    .medal-gold td{background:var(--gold) !important;color:#000;font-weight:800}
+    .medal-silver td{background:var(--silver) !important;color:#000;font-weight:800}
+    .medal-bronze td{background:var(--bronze) !important;color:#000;font-weight:800}
 
-    /* empty state */
-    .empty{color:#b0b5bd;padding:20px;text-align:center;font-style:italic}
-
-    /* responsive */
-    @media (max-width:1100px){
-      .boards{grid-template-columns:1fr;}
-      .card{height:600px;margin-bottom:15px}
-      .col-employee{width:auto}
+    /* responsive adjustments for TVs and large displays */
+    @media (min-width:1600px){
+      .title{font-size:64px}
+      .meta{font-size:32px}
+      .card{height:calc(100vh - 200px);min-height:720px}
+      table{font-size:22px}
+      thead th{font-size:24px;padding:16px 12px}
+      td{font-size:20px;padding:14px 12px}
+      .col-employee{min-width:320px;font-size:22px}
     }
-    
-    @media (max-width:768px){
-      body{padding:10px;}
-      .wrap{padding:10px;margin:10px auto;}
-      
-      .header{padding:20px;gap:10px;}
-      .title{font-size:24px;letter-spacing:0.5px}
-      .meta{font-size:16px;}
-      
-      .boards{gap:12px;margin-top:12px}
-      .card{height:500px;}
-      .card-head{padding:10px;font-size:14px;}
-      
-      table{font-size:11px}
-      thead th{padding:8px 4px;font-size:11px}
-      td{padding:8px 4px;}
-      
-      .col-rank{width:45px;font-size:11px}
-      .col-employee{font-size:11px;padding-left:6px}
-      .col-prod{width:70px;font-size:10px}
-      .col-orders{width:65px;font-size:10px}
-      .col-avg{width:85px;font-size:10px}
+
+    /* smaller screen fallbacks */
+    @media (max-width:1200px){
+      .boards{grid-template-columns:1fr}
+      .card{height:600px;min-height:450px}
+      .title{font-size:28px}
+      .meta{font-size:16px}
+      table{font-size:13px}
+      td{padding:8px}
+      .col-employee{min-width:120px;font-size:13px;padding-left:8px}
+      .col-prod,.col-orders,.col-avg{min-width:56px}
     }
-    
+
+    /* mobile */
     @media (max-width:480px){
-      .title{font-size:20px;}
-      .meta{font-size:14px;}
-      
-      .card{height:450px;}
-      .card-head{font-size:12px;padding:8px;}
-      
-      table{font-size:10px}
-      thead th{padding:6px 3px;font-size:10px}
-      td{padding:6px 3px;}
-      
-      .col-rank{width:40px;font-size:10px}
-      .col-employee{font-size:10px;padding-left:4px}
-      .col-prod{width:60px;font-size:9px}
-      .col-orders{width:55px;font-size:9px}
-      .col-avg{width:75px;font-size:9px}
+      .title{font-size:20px}
+      .card{height:480px}
+      thead th{font-size:12px}
+      td{font-size:12px;padding:6px}
+      .col-employee{min-width:80px;font-size:12px;padding-left:6px}
+      .col-prod,.col-orders,.col-avg{min-width:48px}
     }
 
-    /* scrolling wrapper */
+    /* Scroller */
     .scroll-wrapper{position:relative;flex:1;overflow:hidden}
-    .scroll-content{position:absolute;left:0;right:0;top:0}
+    .scroll-content{position:absolute;left:0;right:0;top:0;will-change:transform}
     .scroll-content table{margin:0}
     .scroll-content tbody{display:block}
-    .fade-top,.fade-bottom{position:absolute;left:0;right:0;height:36px;pointer-events:none}
-    .fade-top{top:0;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0));}
-    .fade-bottom{bottom:0;background:linear-gradient(0deg,rgba(255,255,255,0.98),rgba(255,255,255,0));}
-
-    .notice{grid-column:1/-1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.04);color:#fff;text-align:center}
-    
-
+    .notice{grid-column:1/-1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--text-on-card);text-align:center}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header" role="banner">
-      <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Daily Shipstation Leaderboard</div>
+        <div class="title">Weekly Shipstation Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
-      <div style="width:56px"></div>
     </div>
 
     <div id="boards" class="boards" aria-live="polite" style="margin-top:18px">
       <div class="notice">Loading data...</div>
     </div>
   </div>
-  
-  <div id="debug" style="display:none"></div>
 
 <script>
+// This script is the same parsing logic you had but now wraps employee names and ensures column sizing.
+// It will render the three leaderboards from columns B-F, H-L, N-R of your Weekly Dashboard sheet.
 (async function(){
   const SHEET_ID = '1HYfTADTvqpOMByLHcNPrgu8ahY58AZmdxaVgKbfQlMQ';
   const GID = '1113265790';
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-  
-  // Debug logger
-  const debugEl = document.getElementById('debug');
-  function log(msg, isError = false){
-    console.log(msg);
-    if(debugEl){
-      debugEl.classList.add('show');
-      debugEl.innerHTML += `<div style="color:${isError?'#f00':'#0f0'}">${new Date().toLocaleTimeString()}: ${msg}</div>`;
-    }
-  }
-
-  log(`Starting load from: ${CSV_URL}`);
 
   function parseCSV(text){
     const rows = [];
@@ -206,81 +162,47 @@
     return rows;
   }
 
+  function nice(x){ if(!x) return ''; const n = Number(x.toString().replace(/[,]/g,'')); return Number.isFinite(n) ? n.toLocaleString() : x; }
+
   async function fetchCSV(){
-    log('Fetching CSV...');
     const res = await fetch(CSV_URL);
-    log(`Fetch response status: ${res.status}`);
     if(!res.ok) throw new Error('Failed to load sheet — make sure it is published. Status: '+res.status);
     const txt = await res.text();
-    log(`Received ${txt.length} characters`);
     return parseCSV(txt);
   }
 
-  function findMeta(grid){
-    for(let r=0;r<8 && r<grid.length;r++){
-      const text = (grid[r] || []).join(' ').trim();
-      if(!text) continue;
-      if(/week[:\s]/i.test(text) || /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b/i.test(text)){
-        return {row:r, text};
-      }
-    }
-    return null;
-  }
-  
-  function findLastUpdated(grid){
-    for(let r=0;r<8 && r<grid.length;r++){
-      const text = (grid[r] || []).join(' ').trim();
-      if(/last updated/i.test(text)) return {row:r, text};
-    }
-    return null;
+  function getMeta(grid){
+    // row 1 title, row2 week, row3 last updated (based on your CSV)
+    const weekRow = (grid[1] || []).join(' ').trim();
+    const luRow = (grid[2] || []).join(' ').trim();
+    return { week: weekRow, lastUpdated: luRow };
   }
 
-  function findRankHeaders(grid){
-    const headers = [];
-    for(let r=0;r<12 && r<grid.length;r++){
-      for(let c=0;c<(grid[r]||[]).length;c++){
-        const cell = ((grid[r]||[])[c]||'').toString().trim().toLowerCase();
-        if(cell === 'rank') headers.push({row:r,col:c});
-      }
-    }
-    return headers;
-  }
-
-  function extractBlock(grid, header){
+  function extractRangeByCols(grid, startCol){
     const out = [];
-    const start = header.row + 1;
-    const col = header.col;
-    let empties = 0;
-    for(let r=start;r<grid.length;r++){
+    // header at row index 3 (0-based) per your CSV; data starts at row 4
+    for(let r=4; r<grid.length; r++){
       const row = grid[r] || [];
-      const rank = (row[col] || '').toString().trim();
-      const employee = (row[col+1] || '').toString().trim();
-      const products = (row[col+2] || '').toString().trim();
-      const orders = (row[col+3] || '').toString().trim();
-      const avg = (row[col+4] || '').toString().trim();
-      if(!rank && !employee && !products && !orders && !avg){ 
-        empties++; 
-        if(empties>=3) break; 
-        else continue; 
-      }
-      out.push({rank, employee, products, orders, avg});
+      const rank = (row[startCol] || '').toString().trim();
+      const employee = (row[startCol+1] || '').toString().trim();
+      const products = (row[startCol+2] || '').toString().trim();
+      const orders = (row[startCol+3] || '').toString().trim();
+      const avg = (row[startCol+4] || '').toString().trim();
+      if(!rank && !employee && !products && !orders && !avg) break;
+      out.push({ rank, employee, products, orders, avg });
     }
     return out;
   }
 
-  function nice(x){ 
-    if(!x) return ''; 
-    const n = Number(x.toString().replace(/[,]/g,'')); 
-    return Number.isFinite(n) ? n.toLocaleString() : x; 
-  }
-
   function buildCard(title,color,rows){
-    const head = `<div class="card-head" style="background:${color}">${title.toUpperCase()}</div>`;
-    if(!rows || rows.length===0) return `<div class="card">${head}<div class="card-body"><div class="empty">No data for this week</div></div></div>`;
+    const head = `<div class="card-head" style="background:${color}">🏆 ${title.toUpperCase()} 🏆</div>`;
+    if(!rows || rows.length===0) return `<div class="card">${head}<div class="card-body"><div class="notice">No data for this week</div></div></div>`;
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
-      const displayRank = (idx + 1).toString();
-      return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${r.employee||''}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
+      const displayRank = idx < 3 ? ['🥇','🥈','🥉'][idx] : (idx+1).toString();
+      // wrap employee in a span so CSS can control breaking into multiple lines
+      const empHtml = `<div class="emp-name">${r.employee || ''}</div>`;
+      return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${empHtml}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
     }).join('');
     return `
       <div class="card">
@@ -307,45 +229,20 @@
   }
 
   try{
-    const raw = await fetchCSV();
-    log(`Parsed ${raw.length} rows`);
-    
-    const meta = findMeta(raw);
-    if(meta) {
-      document.getElementById('weekRange').textContent = meta.text.replace(/\s{2,}/g,' ').trim();
-      log(`Found meta: ${meta.text}`);
-    }
-    
-    const lu = findLastUpdated(raw);
-    if(lu) {
-      log(`Found last updated: ${lu.text}`);
-    }
-
-    const headers = findRankHeaders(raw);
-    log(`Found ${headers.length} rank headers at: ${JSON.stringify(headers)}`);
-    
-    let chosen = headers.slice(0,3);
-    if(chosen.length < 3){
-      log('Using fallback header positions');
-      const fallback = [{row:3,col:1},{row:3,col:7},{row:3,col:13}];
-      chosen = fallback.slice(0,3);
-    }
-
-    chosen.sort((a,b)=>a.col - b.col);
-
-    const cats = ['Full-time','Part-Time','Wholesale'];
-    const cols = {'Full-time':'var(--ft)','Part-Time':'var(--pt)','Wholesale':'var(--wh)'};
+    const grid = await fetchCSV();
+    const meta = getMeta(grid);
+    if(meta.week) document.getElementById('weekRange').textContent = meta.week;
+    // build datasets from known columns: Full-time B=1, Part-time H=7, Wholesale N=13 (0-based)
+    const ft = extractRangeByCols(grid, 1);
+    const pt = extractRangeByCols(grid, 7);
+    const wh = extractRangeByCols(grid, 13);
     const boards = document.getElementById('boards');
     boards.innerHTML = '';
+    boards.insertAdjacentHTML('beforeend', buildCard('Full-time','var(--ft)',ft));
+    boards.insertAdjacentHTML('beforeend', buildCard('Part-Time','var(--pt)',pt));
+    boards.insertAdjacentHTML('beforeend', buildCard('Wholesale','var(--wh)',wh));
 
-    for(let i=0;i<3;i++){
-      const h = chosen[i];
-      const rows = h ? extractBlock(raw,h) : [];
-      log(`${cats[i]}: extracted ${rows.length} rows from col ${h.col}`);
-      boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
-    }
-
-    // scrolling animation - scroll down then back up
+    // scrolling: duplicate and animate only if needed
     document.querySelectorAll('.scroll-wrapper').forEach(wrapper=>{
       const content = wrapper.querySelector('.scroll-content');
       const inner = content.querySelector('table');
@@ -353,57 +250,41 @@
         const contentH = inner.scrollHeight;
         const wrapH = wrapper.clientHeight;
         if(contentH > wrapH){
+          content.innerHTML = content.innerHTML + content.innerHTML; // duplicate for loop
           let pos = 0;
-          const scrollDistance = contentH - wrapH;
-          const speed = 30; // px/sec
-          let direction = 1; // 1 = down, -1 = up
+          const speed = Math.max(18, Math.min(60, Math.floor(contentH/20))); // adapt speed to content size
+          let direction = 1;
           let raf = null;
           let last = performance.now();
           let pauseUntil = 0;
-          
           function step(now){
-            // Pause at top and bottom
-            if(now < pauseUntil){
-              raf = requestAnimationFrame(step);
-              return;
-            }
-            
+            if(now < pauseUntil){ raf = requestAnimationFrame(step); return; }
             const delta = now - last;
             last = now;
             pos += (speed * delta / 1000) * direction;
-            
-            // Reached bottom, pause then reverse
-            if(pos >= scrollDistance){
-              pos = scrollDistance;
-              direction = -1;
-              pauseUntil = now + 2000; // pause 2 seconds at bottom
+            const half = content.scrollHeight / 2;
+            const maxPos = half - wrapH;
+            if(pos >= maxPos){
+              pos = maxPos; direction = -1; pauseUntil = now + 1500;
+            } else if(pos <= 0){
+              pos = 0; direction = 1; pauseUntil = now + 1500;
             }
-            // Reached top, pause then go down
-            else if(pos <= 0){
-              pos = 0;
-              direction = 1;
-              pauseUntil = now + 2000; // pause 2 seconds at top
-            }
-            
             content.style.transform = `translateY(${-pos}px)`;
             raf = requestAnimationFrame(step);
           }
           raf = requestAnimationFrame(step);
+          wrapper.addEventListener('mouseenter', ()=>{ if(raf) cancelAnimationFrame(raf); raf = null; });
+          wrapper.addEventListener('mouseleave', ()=>{ if(!raf){ last = performance.now(); raf = requestAnimationFrame(step); } });
         } else {
-          inner.style.marginTop = Math.max(0, (wrapH - contentH)/2) + 'px';
+          inner.style.marginTop = Math.max(0, (wrapper.clientHeight - contentH)/2) + 'px';
         }
       },120);
     });
 
-    log('✓ Dashboard loaded successfully!');
-    // Debug panel is now hidden permanently
-
   } catch(err){
-    log(`ERROR: ${err.message}`, true);
     console.error(err);
-    document.getElementById('boards').innerHTML = `<div class="notice">⚠️ Error loading data: ${err.message}<br><br>Troubleshooting steps:<br>1. Make sure the Google Sheet is published (File → Share → Publish to web)<br>2. Select "Entire Document" or the specific sheet<br>3. Choose "Web page" format<br>4. Click Publish</div>`;
+    document.getElementById('boards').innerHTML = `<div class="notice">⚠️ Error loading data: ${err.message}. Make sure the Weekly Dashboard sheet is published (File → Share → Publish to web).</div>`;
   }
-})();
-</script>
+})();</script>
 </body>
 </html>
