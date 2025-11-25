@@ -322,7 +322,7 @@
       // Only split name to two lines if longer than 14 characters
       const fullName = (r.employee || '').trim();
       let employeeName = fullName;
-      if(fullName.length > 14) {
+      if(fullName.length > 15) {
         const nameParts = fullName.split(/\s+/);
         if(nameParts.length >= 2) {
           const firstName = nameParts.slice(0, -1).join(' ');
