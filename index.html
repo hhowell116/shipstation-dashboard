@@ -191,7 +191,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shippingg Leaderboard</div>
+        <div class="title">Today's Shipping Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -318,18 +318,7 @@
 
   function buildCard(title,color,rows){
     const head = `<div class="card-head" style="background:${color}">${title.toUpperCase()}</div>`;
-    
-    // Check if there's any actual data (rows with orders/products)
-    const hasData = rows && rows.length > 0 && rows.some(r => 
-      (r.products && r.products !== '0') || 
-      (r.orders && r.orders !== '0') || 
-      r.employee
-    );
-    
-    if(!hasData) {
-      // Return hidden card if no data
-      return `<div class="card" style="display:none;" data-category="${title}"></div>`;
-    }
+    if(!rows || rows.length===0) return `<div class="card">${head}<div class="card-body"><div class="empty">No data for this week</div></div></div>`;
     
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
@@ -349,7 +338,7 @@
     }).join('');
     
     return `
-      <div class="card" data-category="${title}">
+      <div class="card">
         ${head}
         <div class="card-body">
           <div class="table-container">
