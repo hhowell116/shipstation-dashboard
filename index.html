@@ -285,20 +285,22 @@
       <div class="card">
         ${head}
         <div class="card-body">
-          <table aria-label="${title} leaderboard">
-            <thead>
-              <tr>
-                <th class="col-rank">Rank</th>
-                <th class="col-employee">Employee</th>
-                <th class="col-prod">Products</th>
-                <th class="col-orders">Orders</th>
-                <th class="col-avg">Avg Item/Order</th>
-              </tr>
-            </thead>
-          </table>
-          <div class="scroll-wrapper" data-rows="${rows.length}" style="flex:1;position:relative">
-            <div class="scroll-content" role="list" aria-label="${title} entries">
-              <table><tbody>${rowsHtml}</tbody></table>
+          <div class="table-container">
+            <table aria-label="${title} leaderboard">
+              <thead>
+                <tr>
+                  <th class="col-rank">Rank</th>
+                  <th class="col-employee">Employee</th>
+                  <th class="col-prod">Products</th>
+                  <th class="col-orders">Orders</th>
+                  <th class="col-avg">Avg Item/Order</th>
+                </tr>
+              </thead>
+            </table>
+            <div class="scroll-wrapper" data-rows="${rows.length}" style="flex:1;position:relative">
+              <div class="scroll-content" role="list" aria-label="${title} entries">
+                <table><tbody>${rowsHtml}</tbody></table>
+              </div>
             </div>
           </div>
         </div>
