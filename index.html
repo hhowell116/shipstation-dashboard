@@ -341,7 +341,7 @@
 
     document.querySelectorAll('.scroll-wrapper').forEach(wrapper=>{
       const content = wrapper.querySelector('.scroll-content');
-      const inner = content.querySelector('table');
+      const inner = content.querySelector('tbody');
       setTimeout(()=>{
         const contentH = inner.scrollHeight;
         const wrapH = wrapper.clientHeight;
@@ -350,13 +350,12 @@
           const scrollDistance = contentH - wrapH;
           const speed = 30;
           let direction = 1;
-          let raf = null;
           let last = performance.now();
           let pauseUntil = 0;
           
           function step(now){
             if(now < pauseUntil){
-              raf = requestAnimationFrame(step);
+              requestAnimationFrame(step);
               return;
             }
             
@@ -375,10 +374,10 @@
               pauseUntil = now + 2000;
             }
             
-            content.style.transform = `translateY(${-pos}px)`;
-            raf = requestAnimationFrame(step);
+            inner.style.transform = `translateY(${-pos}px)`;
+            requestAnimationFrame(step);
           }
-          raf = requestAnimationFrame(step);
+          requestAnimationFrame(step);
         } else {
           inner.style.marginTop = Math.max(0, (wrapH - contentH)/2) + 'px';
         }
