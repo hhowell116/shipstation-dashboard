@@ -346,52 +346,47 @@
       boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
     }
 
-    document.querySelectorAll('.scroll-wrapper').forEach(wrapper=>{
-      const content = wrapper.querySelector('.scroll-content');
-      const inner = content.querySelector('tbody');
-      setTimeout(()=>{
-        const contentH = inner.scrollHeight;
-        const wrapH = wrapper.clientHeight;
-        if(contentH > wrapH){
-          // Position at top initially
-          content.style.position = 'absolute';
-          content.style.top = '0';
-          content.style.left = '0';
-          content.style.right = '0';
-          
-          let pos = 0;
-          const scrollDistance = contentH - wrapH;
-          const speed = 30;
-          let direction = 1;
-          let last = performance.now();
-          
-          function step(now){
-            const delta = now - last;
-            last = now;
-            pos += (speed * delta / 1000) * direction;
-            
-            // Reached bottom - smoothly reverse
-            if(pos >= scrollDistance){
-              pos = scrollDistance;
-              direction = -1;
-            }
-            // Reached top - smoothly go back down
-            else if(pos <= 0){
-              pos = 0;
-              direction = 1;
-            }
-            
-            inner.style.transform = `translateY(${-pos}px)`;
-            requestAnimationFrame(step);
-          }
-          requestAnimationFrame(step);
-        } else {
-          // If content fits, position at top (no centering)
-          content.style.position = 'relative';
-          inner.style.marginTop = '0px';
-        }
-      },120);
-    });
+    document.querySelectorAll('.scroll-wrapper').forEach(wrapper => {
+  const content = wrapper.querySelector('.scroll-content');
+  const table = content.querySelector('table');
+  const tbody = table.querySelector('tbody');
+
+  setTimeout(() => {
+    const contentH = tbody.scrollHeight;
+    const wrapH = wrapper.clientHeight;
+
+    if (contentH <= wrapH) {
+      // No scrolling needed
+      return;
+    }
+
+    // DUPLICATE content for infinite loop
+    const clone = tbody.cloneNode(true);
+    table.appendChild(clone);
+
+    let pos = 0;
+    const speed = 20; // px/sec
+    let last = performance.now();
+
+    function step(now) {
+      const delta = now - last;
+      last = now;
+
+      pos += speed * (delta / 1000);
+
+      // Reset instantly when first block fully scrolls out
+      if (pos >= contentH) {
+        pos = 0;
+      }
+
+      content.style.transform = `translateY(${-pos}px)`;
+      requestAnimationFrame(step);
+    }
+
+    requestAnimationFrame(step);
+  }, 200);
+});
+
 
     log('✓ Dashboard loaded successfully!');
 
