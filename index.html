@@ -146,7 +146,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shipping Leaderboard</div>
+        <div class="title">Today's Shippingg Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -346,13 +346,17 @@
       boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
     }
 
-    document.querySelectorAll('.scroll-wrapper').forEach(wrapper => {
+  document.querySelectorAll('.scroll-wrapper').forEach(wrapper => {
   const content = wrapper.querySelector('.scroll-content');
   const table = content.querySelector('table');
   const tbody = table.querySelector('tbody');
 
   setTimeout(() => {
-    const contentH = tbody.scrollHeight;
+    const rows = tbody.querySelectorAll('tr');
+    if (rows.length === 0) return;
+
+    // Calculate total content height
+    const contentH = tbody.offsetHeight;
     const wrapH = wrapper.clientHeight;
 
     if (contentH <= wrapH) {
@@ -360,9 +364,11 @@
       return;
     }
 
-    // DUPLICATE content for infinite loop
-    const clone = tbody.cloneNode(true);
-    table.appendChild(clone);
+    // Clone ALL rows and append to create seamless loop
+    rows.forEach(row => {
+      const clone = row.cloneNode(true);
+      tbody.appendChild(clone);
+    });
 
     let pos = 0;
     const speed = 20; // px/sec
@@ -374,12 +380,15 @@
 
       pos += speed * (delta / 1000);
 
-      // Reset instantly when first block fully scrolls out
+      // Reset when first set of rows completely scrolls out
       if (pos >= contentH) {
         pos = 0;
       }
 
-      content.style.transform = `translateY(${-pos}px)`;
+      // Apply transform to tbody instead of scroll-content
+      tbody.style.transform = `translateY(${-pos}px)`;
+      tbody.style.transition = 'none';
+      
       requestAnimationFrame(step);
     }
 
