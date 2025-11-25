@@ -277,7 +277,9 @@
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
       const displayRank = (idx + 1).toString();
-      return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${r.employee||''}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
+      // Split name by space and join with newline so first/last names stay on separate lines
+      const employeeName = (r.employee || '').replace(/\s+/g, '\n');
+      return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${employeeName}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
     }).join('');
     return `
       <div class="card">
