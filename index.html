@@ -41,24 +41,28 @@
       flex-direction:column;
       height:calc(100vh - 220px);
       min-height:700px;
+      min-width:0;
     }
     .card-head{padding:18px 14px;color:#fff;font-weight:700;text-align:center;font-size:22px}
     .card-body{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;background:#2a2f3a}
     
     /* Table container structure */
-    .table-container{display:flex;flex-direction:column;height:100%;overflow:hidden}
+    .table-container{display:flex;flex-direction:column;height:100%;overflow:hidden;min-width:0}
     
     /* Fixed header table */
-    .header-table{width:100%;border-collapse:collapse;flex-shrink:0;table-layout:fixed}
+    .header-table{width:100%;border-collapse:collapse;flex-shrink:0;table-layout:fixed;min-width:0}
     .header-table thead th{
-      padding:16px 10px;
+      padding:12px 6px;
       text-align:center;
       font-weight:700;
       color:white;
       background:#1a1f28;
-      font-size:18px;
-      white-space:nowrap;
+      font-size:16px;
+      white-space:normal;
+      word-wrap:break-word;
       box-sizing:border-box;
+      line-height:1.2;
+      overflow-wrap:break-word;
     }
     
     /* Scrolling body wrapper */
@@ -89,32 +93,33 @@
     }
     
     .body-table td{
-      padding:16px 10px;
+      padding:12px 6px;
       text-align:center;
       border-bottom:1px solid rgba(255,255,255,0.05);
       vertical-align:middle;
-      font-size:17px;
+      font-size:16px;
       color:#fff;
       box-sizing:border-box;
+      overflow-wrap:break-word;
     }
     
     /* Remove border from medal rows */
     .medal-gold td, .medal-silver td, .medal-bronze td{border-bottom:none}
-    .col-rank{font-size:20px;font-weight:700;width:12%}
+    .col-rank{font-size:18px;font-weight:700;width:12%}
     .col-employee{
       text-align:center;
-      padding-left:10px;
-      padding-right:10px;
-      font-size:18px;
+      padding-left:8px;
+      padding-right:8px;
+      font-size:16px;
       font-weight:600;
       white-space:normal;
       word-wrap:break-word;
-      width:38%;
+      width:35%;
       line-height:1.3;
     }
-    .col-prod{font-size:18px;font-weight:600;width:17%}
-    .col-orders{font-size:18px;font-weight:600;width:17%}
-    .col-avg{font-size:18px;font-weight:600;width:16%}
+    .col-prod{font-size:16px;font-weight:600;width:16%}
+    .col-orders{font-size:16px;font-weight:600;width:16%}
+    .col-avg{font-size:14px;font-weight:600;width:21%}
 
     /* row shading */
     .body-table tbody tr:nth-child(odd) td{background:#353b47}
@@ -182,7 +187,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shippingg Leaderboard</div>
+        <div class="title">Today's Shipping Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -314,13 +319,16 @@
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
       const displayRank = (idx + 1).toString();
-      // Split name on space - first name on first line, last name on second line
-      const nameParts = (r.employee || '').trim().split(/\s+/);
-      let employeeName = r.employee || '';
-      if(nameParts.length >= 2) {
-        const firstName = nameParts.slice(0, -1).join(' ');
-        const lastName = nameParts[nameParts.length - 1];
-        employeeName = `${firstName}<br>${lastName}`;
+      // Only split name to two lines if longer than 14 characters
+      const fullName = (r.employee || '').trim();
+      let employeeName = fullName;
+      if(fullName.length > 14) {
+        const nameParts = fullName.split(/\s+/);
+        if(nameParts.length >= 2) {
+          const firstName = nameParts.slice(0, -1).join(' ');
+          const lastName = nameParts[nameParts.length - 1];
+          employeeName = `${firstName}<br>${lastName}`;
+        }
       }
       return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${employeeName}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
     }).join('');
@@ -424,7 +432,8 @@
         function animate(currentTime) {
           // Handle pause at boundaries
           if(isPaused) {
-            if(currentTime - pauseStartTime >= pauseDuration) {
+            const pauseElapsed = currentTime - pauseStartTime;
+            if(pauseElapsed >= pauseDuration) {
               isPaused = false;
               lastTime = currentTime; // Reset time after pause
             } else {
@@ -438,13 +447,13 @@
           
           position += scrollSpeed * deltaTime * direction;
           
-          // Reverse direction at boundaries and trigger pause
-          if(position >= maxScroll) {
+          // Check boundaries and trigger pause
+          if(direction === 1 && position >= maxScroll) {
             position = maxScroll;
             direction = -1; // Start scrolling up
             isPaused = true;
             pauseStartTime = currentTime;
-          } else if(position <= 0) {
+          } else if(direction === -1 && position <= 0) {
             position = 0;
             direction = 1; // Start scrolling down
             isPaused = true;
@@ -456,7 +465,7 @@
           requestAnimationFrame(animate);
         }
         
-        log('Starting ping-pong animation');
+        log('Starting ping-pong animation with pauses');
         requestAnimationFrame(animate);
       });
     }, 500);
