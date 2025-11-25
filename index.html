@@ -58,11 +58,17 @@
       color:white;
       background:#1a1f28;
       font-size:16px;
-      white-space:normal;
-      word-wrap:break-word;
+      white-space:nowrap;
       box-sizing:border-box;
       line-height:1.2;
-      overflow-wrap:break-word;
+      overflow:hidden;
+      text-overflow:clip;
+    }
+    
+    /* Only Avg column can wrap */
+    .header-table thead th.col-avg{
+      white-space:normal;
+      line-height:1.2;
     }
     
     /* Scrolling body wrapper */
@@ -187,7 +193,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shipping Leaderboard</div>
+        <div class="title">Today's Shippingg Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -319,7 +325,7 @@
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
       const displayRank = (idx + 1).toString();
-      // Only split name to two lines if longer than 14 characters
+      // Only split name to two lines if longer than 15 characters
       const fullName = (r.employee || '').trim();
       let employeeName = fullName;
       if(fullName.length > 15) {
@@ -345,7 +351,7 @@
                   <th class="col-employee">Employee</th>
                   <th class="col-prod">Products</th>
                   <th class="col-orders">Orders</th>
-                  <th class="col-avg">Avg Item/Order</th>
+                  <th class="col-avg">Avg<br>Item/Order</th>
                 </tr>
               </thead>
             </table>
