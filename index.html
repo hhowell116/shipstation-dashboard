@@ -206,7 +206,9 @@
 
 <script>
 (async function(){
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/###/pub?gid=165470098&single=true&output=csv";
+  const SHEET_ID = '1-S1OU7nw_085IXVbfiOY5qDPuRcPx2RqQJg8pnOqU9I';
+  const GID = '165470098';
+  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
   
   const debugEl = document.getElementById('debug');
