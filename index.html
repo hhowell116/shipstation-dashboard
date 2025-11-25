@@ -146,7 +146,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shipstation Leaderboard</div>
+        <div class="title">Today's Shipping Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -364,36 +364,21 @@
           const speed = 30;
           let direction = 1;
           let last = performance.now();
-          let pauseUntil = 0;
           
           function step(now){
-            // Check if we're in pause period
-            if(pauseUntil > 0 && now < pauseUntil){
-              requestAnimationFrame(step);
-              return;
-            }
-            
-            // Resume after pause - reset last timestamp
-            if(pauseUntil > 0 && now >= pauseUntil){
-              pauseUntil = 0;
-              last = now;
-            }
-            
             const delta = now - last;
             last = now;
             pos += (speed * delta / 1000) * direction;
             
-            // Reached bottom - pause then reverse
+            // Reached bottom - smoothly reverse
             if(pos >= scrollDistance){
               pos = scrollDistance;
               direction = -1;
-              pauseUntil = now + 2000;
             }
-            // Reached top - pause then go down
+            // Reached top - smoothly go back down
             else if(pos <= 0){
               pos = 0;
               direction = 1;
-              pauseUntil = now + 2000;
             }
             
             inner.style.transform = `translateY(${-pos}px)`;
