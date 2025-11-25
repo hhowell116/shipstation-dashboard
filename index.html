@@ -191,7 +191,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shipping Leaderboard</div>
+        <div class="title">Today's Shippingg Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -305,10 +305,7 @@
         if(empties>=3) break; 
         else continue; 
       }
-      // Only add row if it has an employee name AND some data
-      if(employee && (products || orders)) {
-        out.push({rank, employee, products, orders, avg});
-      }
+      out.push({rank, employee, products, orders, avg});
     }
     return out;
   }
@@ -322,8 +319,15 @@
   function buildCard(title,color,rows){
     const head = `<div class="card-head" style="background:${color}">${title.toUpperCase()}</div>`;
     
-    // Hide card if no valid rows
-    if(!rows || rows.length === 0) {
+    // Check if there's any actual data (rows with orders/products)
+    const hasData = rows && rows.length > 0 && rows.some(r => 
+      (r.products && r.products !== '0') || 
+      (r.orders && r.orders !== '0') || 
+      r.employee
+    );
+    
+    if(!hasData) {
+      // Return hidden card if no data
       return `<div class="card" style="display:none;" data-category="${title}"></div>`;
     }
     
@@ -409,17 +413,6 @@
       const rows = h ? extractBlock(raw,h) : [];
       log(`${cats[i]}: extracted ${rows.length} rows from col ${h.col}`);
       boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
-    }
-    
-    // Adjust grid layout based on visible cards
-    const visibleCards = boards.querySelectorAll('.card:not([style*="display:none"])');
-    log(`Visible cards: ${visibleCards.length}`);
-    if(visibleCards.length === 2) {
-      boards.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    } else if(visibleCards.length === 1) {
-      boards.style.gridTemplateColumns = '1fr';
-      visibleCards[0].style.maxWidth = '800px';
-      visibleCards[0].style.margin = '0 auto';
     }
 
     // Initialize scrolling for each card
