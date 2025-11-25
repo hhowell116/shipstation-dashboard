@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Daily Shipping Leaderboard</title>
+  <title>WEEKLY SHIPSTATION LEADERBOARD</title>
   <style>
     :root{
       --header-grad: linear-gradient(90deg,#0a5d42,#2d9c6f);
@@ -206,10 +206,9 @@
 
 <script>
 (async function(){
-  const SHEET_ID = '1-S1OU7nw_085IXVbfiOY5qDPuRcPx2RqQJg8pnOqU9I';
-  const GID = '165470098';
+  const SHEET_ID = '1HYfTADTvqpOMByLHcNPrgu8ahY58AZmdxaVgKbfQlMQ';
+  const GID = '1113265790';
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-
   
   const debugEl = document.getElementById('debug');
   function log(msg, isError = false){
@@ -319,7 +318,18 @@
 
   function buildCard(title,color,rows){
     const head = `<div class="card-head" style="background:${color}">${title.toUpperCase()}</div>`;
-    if(!rows || rows.length===0) return `<div class="card">${head}<div class="card-body"><div class="empty">No data for this week</div></div></div>`;
+    
+    // Check if there's any actual data (rows with orders/products)
+    const hasData = rows && rows.length > 0 && rows.some(r => 
+      (r.products && r.products !== '0') || 
+      (r.orders && r.orders !== '0') || 
+      r.employee
+    );
+    
+    if(!hasData) {
+      // Return hidden card if no data
+      return `<div class="card" style="display:none;" data-category="${title}"></div>`;
+    }
     
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
@@ -339,7 +349,7 @@
     }).join('');
     
     return `
-      <div class="card">
+      <div class="card" data-category="${title}">
         ${head}
         <div class="card-body">
           <div class="table-container">
@@ -403,6 +413,17 @@
       const rows = h ? extractBlock(raw,h) : [];
       log(`${cats[i]}: extracted ${rows.length} rows from col ${h.col}`);
       boards.insertAdjacentHTML('beforeend', buildCard(cats[i], cols[cats[i]], rows));
+    }
+    
+    // Adjust grid layout based on visible cards
+    const visibleCards = boards.querySelectorAll('.card:not([style*="display:none"])');
+    log(`Visible cards: ${visibleCards.length}`);
+    if(visibleCards.length === 2) {
+      boards.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    } else if(visibleCards.length === 1) {
+      boards.style.gridTemplateColumns = '1fr';
+      visibleCards[0].style.maxWidth = '800px';
+      visibleCards[0].style.margin = '0 auto';
     }
 
     // Initialize scrolling for each card
