@@ -191,7 +191,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shippingg Leaderboard</div>
+        <div class="title">Today's Shipping Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -305,7 +305,10 @@
         if(empties>=3) break; 
         else continue; 
       }
-      out.push({rank, employee, products, orders, avg});
+      // Only add row if it has an employee name AND some data
+      if(employee && (products || orders)) {
+        out.push({rank, employee, products, orders, avg});
+      }
     }
     return out;
   }
@@ -319,21 +322,12 @@
   function buildCard(title,color,rows){
     const head = `<div class="card-head" style="background:${color}">${title.toUpperCase()}</div>`;
     
-    // Filter out empty rows (no employee name or all zeros)
-    const validRows = rows.filter(r => {
-      const hasEmployee = r.employee && r.employee.trim() !== '';
-      const hasOrders = r.orders && r.orders !== '0' && r.orders.trim() !== '';
-      const hasProducts = r.products && r.products !== '0' && r.products.trim() !== '';
-      return hasEmployee && (hasOrders || hasProducts);
-    });
-    
-    // Check if there's any actual data
-    if(!validRows || validRows.length === 0) {
-      // Return hidden card if no data
+    // Hide card if no valid rows
+    if(!rows || rows.length === 0) {
       return `<div class="card" style="display:none;" data-category="${title}"></div>`;
     }
     
-    const rowsHtml = validRows.map((r,idx)=>{
+    const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
       const displayRank = (idx + 1).toString();
       // Only split name to two lines if longer than 15 characters
