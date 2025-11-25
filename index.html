@@ -49,7 +49,7 @@
     .table-container{display:flex;flex-direction:column;height:100%;overflow:hidden}
     
     /* Fixed header table */
-    .header-table{width:100%;border-collapse:collapse;flex-shrink:0}
+    .header-table{width:100%;border-collapse:collapse;flex-shrink:0;table-layout:fixed}
     .header-table thead th{
       padding:16px 10px;
       text-align:center;
@@ -58,6 +58,7 @@
       background:#1a1f28;
       font-size:18px;
       white-space:nowrap;
+      box-sizing:border-box;
     }
     
     /* Scrolling body wrapper */
@@ -78,6 +79,7 @@
     .body-table{
       width:100%;
       border-collapse:collapse;
+      table-layout:fixed;
     }
     
     .body-table tbody tr{
@@ -93,25 +95,26 @@
       vertical-align:middle;
       font-size:17px;
       color:#fff;
+      box-sizing:border-box;
     }
     
     /* Remove border from medal rows */
     .medal-gold td, .medal-silver td, .medal-bronze td{border-bottom:none}
-    .col-rank{font-size:20px;font-weight:700;width:60px}
+    .col-rank{font-size:20px;font-weight:700;width:12%}
     .col-employee{
-      text-align:left;
-      padding-left:16px;
-      padding-right:16px;
+      text-align:center;
+      padding-left:10px;
+      padding-right:10px;
       font-size:18px;
       font-weight:600;
-      white-space:nowrap;
-      width:40%;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      white-space:normal;
+      word-wrap:break-word;
+      width:38%;
+      line-height:1.3;
     }
-    .col-prod{font-size:18px;font-weight:600;width:15%}
-    .col-orders{font-size:18px;font-weight:600;width:15%}
-    .col-avg{font-size:18px;font-weight:600;width:15%}
+    .col-prod{font-size:18px;font-weight:600;width:17%}
+    .col-orders{font-size:18px;font-weight:600;width:17%}
+    .col-avg{font-size:18px;font-weight:600;width:16%}
 
     /* row shading */
     .body-table tbody tr:nth-child(odd) td{background:#353b47}
@@ -148,10 +151,10 @@
       .body-table td{padding:8px 4px;font-size:11px}
       
       .col-rank{width:45px;font-size:11px}
-      .col-employee{font-size:11px;padding-left:6px;white-space:normal;word-break:break-word}
-      .col-prod{width:70px;font-size:10px}
-      .col-orders{width:65px;font-size:10px}
-      .col-avg{width:85px;font-size:10px}
+      .col-employee{font-size:11px;padding-left:6px;padding-right:6px;white-space:normal;word-break:break-word}
+      .col-prod{width:17%;font-size:10px}
+      .col-orders{width:17%;font-size:10px}
+      .col-avg{width:16%;font-size:10px}
     }
     
     @media (max-width:480px){
@@ -165,10 +168,10 @@
       .body-table td{padding:6px 3px;font-size:10px}
       
       .col-rank{width:40px;font-size:10px}
-      .col-employee{font-size:10px;padding-left:4px}
-      .col-prod{width:60px;font-size:9px}
-      .col-orders{width:55px;font-size:9px}
-      .col-avg{width:75px;font-size:9px}
+      .col-employee{font-size:10px;padding-left:4px;padding-right:4px}
+      .col-prod{width:17%;font-size:9px}
+      .col-orders{width:17%;font-size:9px}
+      .col-avg{width:16%;font-size:9px}
     }
 
     .notice{grid-column:1/-1;padding:12px;border-radius:8px;background:rgba(255,255,255,0.04);color:#fff;text-align:center}
@@ -179,7 +182,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Today's Shipping Leaderboard</div>
+        <div class="title">Today's Shippingg Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -311,7 +314,14 @@
     const rowsHtml = rows.map((r,idx)=>{
       const cls = idx===0? 'medal-gold' : idx===1? 'medal-silver' : idx===2? 'medal-bronze' : '';
       const displayRank = (idx + 1).toString();
-      const employeeName = (r.employee || '').replace(/\s+/g, '\n');
+      // Split name on space - first name on first line, last name on second line
+      const nameParts = (r.employee || '').trim().split(/\s+/);
+      let employeeName = r.employee || '';
+      if(nameParts.length >= 2) {
+        const firstName = nameParts.slice(0, -1).join(' ');
+        const lastName = nameParts[nameParts.length - 1];
+        employeeName = `${firstName}<br>${lastName}`;
+      }
       return `<tr class="${cls}"><td class="col-rank">${displayRank}</td><td class="col-employee">${employeeName}</td><td class="col-prod">${nice(r.products)}</td><td class="col-orders">${nice(r.orders)}</td><td class="col-avg">${r.avg||''}</td></tr>`;
     }).join('');
     
@@ -406,21 +416,39 @@
         let direction = 1; // 1 for down, -1 for up
         const scrollSpeed = 25; // pixels per second
         const maxScroll = contentHeight - wrapperHeight;
+        const pauseDuration = 3000; // 3 second pause in milliseconds
         let lastTime = performance.now();
+        let isPaused = false;
+        let pauseStartTime = 0;
         
         function animate(currentTime) {
+          // Handle pause at boundaries
+          if(isPaused) {
+            if(currentTime - pauseStartTime >= pauseDuration) {
+              isPaused = false;
+              lastTime = currentTime; // Reset time after pause
+            } else {
+              requestAnimationFrame(animate);
+              return;
+            }
+          }
+          
           const deltaTime = (currentTime - lastTime) / 1000; // convert to seconds
           lastTime = currentTime;
           
           position += scrollSpeed * deltaTime * direction;
           
-          // Reverse direction at boundaries
+          // Reverse direction at boundaries and trigger pause
           if(position >= maxScroll) {
             position = maxScroll;
             direction = -1; // Start scrolling up
+            isPaused = true;
+            pauseStartTime = currentTime;
           } else if(position <= 0) {
             position = 0;
             direction = 1; // Start scrolling down
+            isPaused = true;
+            pauseStartTime = currentTime;
           }
           
           scrollContent.style.transform = `translateY(-${position}px)`;
