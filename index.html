@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Daily ShipStation Leaderboard</title>
+  <title>WEEKLY SHIPSTATION LEADERBOARD</title>
   <style>
     :root{
       --header-grad: linear-gradient(90deg,#0a5d42,#2d9c6f);
@@ -131,8 +131,8 @@
     }
 
     /* scrolling wrapper */
-    .scroll-wrapper{position:relative;flex:1;overflow:hidden}
-    .scroll-content{position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden}
+    .scroll-wrapper{position:relative;flex:1;overflow:hidden;display:flex;flex-direction:column}
+    .scroll-content{position:relative;width:100%;overflow:hidden;flex-shrink:0}
     .scroll-content table{margin:0;width:100%;height:auto}
     .fade-top,.fade-bottom{position:absolute;left:0;right:0;height:36px;pointer-events:none}
     .fade-top{top:0;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0));}
@@ -146,7 +146,7 @@
     <div class="header" role="banner">
       <div style="width:56px"></div>
       <div class="header-center">
-        <div class="title">Daily Shipstation Leaderboard</div>
+        <div class="title">Today's Shipstation Leaderboard</div>
         <div id="weekRange" class="meta">Week: loading…</div>
       </div>
       <div style="width:56px"></div>
@@ -351,6 +351,12 @@
         const contentH = inner.scrollHeight;
         const wrapH = wrapper.clientHeight;
         if(contentH > wrapH){
+          // Position at top initially
+          content.style.position = 'absolute';
+          content.style.top = '0';
+          content.style.left = '0';
+          content.style.right = '0';
+          
           let pos = 0;
           const scrollDistance = contentH - wrapH;
           const speed = 30;
@@ -384,7 +390,9 @@
           }
           requestAnimationFrame(step);
         } else {
-          inner.style.marginTop = Math.max(0, (wrapH - contentH)/2) + 'px';
+          // If content fits, position at top (no centering)
+          content.style.position = 'relative';
+          inner.style.marginTop = '0px';
         }
       },120);
     });
